@@ -1,6 +1,7 @@
 [package]
 name = "pharia-skill-macros"
 description = "Procedural macros for use within the `pharia-skill` crate."
+rust-version = "1.76.0"
 authors.workspace = true
 version.workspace = true
 edition.workspace = true

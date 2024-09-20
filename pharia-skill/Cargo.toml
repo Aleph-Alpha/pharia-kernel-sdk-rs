@@ -1,6 +1,7 @@
 [package]
 name = "pharia-skill"
 description = "SDK for building Skills that run within Pharia Kernel."
+rust-version = "1.76.0"
 authors.workspace = true
 version.workspace = true
 edition.workspace = true

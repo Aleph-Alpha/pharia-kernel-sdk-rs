@@ -1,5 +1,7 @@
 [package]
 name = "pharia-skill-test"
+description = "Test helpers for testing Pharia Kernel skill components locally."
+rust-version = "1.76.0"
 authors.workspace = true
 version.workspace = true
 edition.workspace = true
