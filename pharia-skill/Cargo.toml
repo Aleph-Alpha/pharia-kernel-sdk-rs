@@ -1,9 +1,9 @@
 [package]
 name = "pharia-skill"
 description = "SDK for building Skills that run within Pharia Kernel."
+version.workspace = true
 rust-version = "1.76.0"
 authors.workspace = true
-version.workspace = true
 edition.workspace = true
 repository.workspace = true
 readme.workspace = true
@@ -11,11 +11,11 @@ categories.workspace = true
 keywords.workspace = true
 
 [dependencies]
-anyhow = "1.0.72"
-pharia-skill-macros = { path = "../pharia-skill-macros" }
-serde = { version = "1.0.166", features = ["derive"] }
-serde_json = "1.0.97"
-wit-bindgen = "0.32.0"
+anyhow.workspace = true
+pharia-skill-macros.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+wit-bindgen.workspace = true
 
 [lints]
 workspace = true
