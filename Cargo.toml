@@ -1,5 +1,5 @@
 [workspace]
-members = ["pharia-skill", "pharia-skill-macros"]
+members = ["pharia-skill", "pharia-skill-macros", "pharia-skill-test"]
 resolver = "2"
 
 [workspace.package]
