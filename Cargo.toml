@@ -1,0 +1,41 @@
+[workspace]
+members = ["pharia-skill-macros"]
+resolver = "2"
+
+[workspace.package]
+authors = [
+    "Markus Klein <markus.klein@aleph-alpha.com>",
+    "Ben Brandt <benjamin.brandt@aleph-alpha.com>",
+    "Moritz Althaus <moritz.althaus@aleph-alpha.com>",
+    "Jia Ho Lee <jiaho.lee@aleph-alpha.com>",
+    "Daniel Tscherwinka <daniel.tscherwinka@aleph-alpha.com>",
+    "Peter Barth <peter.barth@aleph-alpha.com>",
+]
+version = "0.1.0"
+edition = "2021"
+repository = "https://github.com/Aleph-Alpha/pharia-kernel-sdk-rs"
+readme = "README.md"
+categories = ["API bindings"]
+keywords = ["ai", "llm", "skill"]
+
+[workspace.lints.rust]
+future-incompatible = "warn"
+keyword-idents = "warn"
+let-underscore = "warn"
+nonstandard-style = "warn"
+refining-impl-trait = "warn"
+rust-2018-idioms = "warn"
+rust-2024-compatibility = "warn"
+unused = { level = "warn", priority = -1 }
+
+[workspace.lints.clippy]
+cargo = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+module-name-repetitions = "allow"
+
+[profile.release]
+codegen-units = 1
+opt-level = "s"
+debug = false
+strip = true
+lto = true

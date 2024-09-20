@@ -1,0 +1,21 @@
+[package]
+name = "pharia-skill-macros"
+description = "Procedural macros for use within the `pharia-skill` crate."
+authors.workspace = true
+version.workspace = true
+edition.workspace = true
+keywords.workspace = true
+readme.workspace = true
+repository.workspace = true
+categories.workspace = true
+
+[lib]
+name = "pharia_skill_macros"
+proc-macro = true
+
+[dependencies]
+quote = "1"
+syn = { version = "2", features = ["full"] }
+
+[lints]
+workspace = true
