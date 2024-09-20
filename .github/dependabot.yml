@@ -11,16 +11,12 @@ updates:
       interval: "daily"
     allow:
       - dependency-type: "all"
+    versioning-strategy: "increase-if-necessary"
     groups:
       minor:
         update-types:
           - "minor"
           - "patch"
-
-  - package-ecosystem: "docker"
-    directory: "/"
-    schedule:
-      interval: "daily"
 
   - package-ecosystem: "github-actions"
     directory: "/"

@@ -11,9 +11,9 @@ categories.workspace = true
 keywords.workspace = true
 
 [dependencies]
-anyhow = "1"
+anyhow = "1.0.72"
 pharia-skill-macros = { path = "../pharia-skill-macros" }
-serde = { version = "1", features = ["derive"] }
+serde = { version = "1.0.166", features = ["derive"] }
 serde_json = "1.0.97"
 wit-bindgen = "0.32.0"
 
