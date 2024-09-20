@@ -1,8 +1,9 @@
 [package]
 name = "pharia-skill-macros"
 description = "Procedural macros for use within the `pharia-skill` crate."
-authors.workspace = true
 version.workspace = true
+rust-version = "1.76.0"
+authors.workspace = true
 edition.workspace = true
 keywords.workspace = true
 readme.workspace = true
@@ -14,8 +15,8 @@ name = "pharia_skill_macros"
 proc-macro = true
 
 [dependencies]
-quote = "1"
-syn = { version = "2", features = ["full"] }
+quote.workspace = true
+syn.workspace = true
 
 [lints]
 workspace = true
