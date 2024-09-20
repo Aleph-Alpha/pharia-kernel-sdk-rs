@@ -1,0 +1,20 @@
+[package]
+name = "pharia-skill"
+description = "SDK for building Skills that run within Pharia Kernel."
+authors.workspace = true
+version.workspace = true
+edition.workspace = true
+repository.workspace = true
+readme.workspace = true
+categories.workspace = true
+keywords.workspace = true
+
+[dependencies]
+anyhow = "1"
+pharia-skill-macros = { path = "../pharia-skill-macros" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+wit-bindgen = "0.32.0"
+
+[lints]
+workspace = true

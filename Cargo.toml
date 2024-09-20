@@ -1,5 +1,5 @@
 [workspace]
-members = ["pharia-skill-macros"]
+members = ["pharia-skill", "pharia-skill-macros"]
 resolver = "2"
 
 [workspace.package]
@@ -29,13 +29,6 @@ rust-2024-compatibility = "warn"
 unused = { level = "warn", priority = -1 }
 
 [workspace.lints.clippy]
-cargo = { level = "warn", priority = -1 }
+# cargo = { level = "warn", priority = -1 }
 pedantic = { level = "warn", priority = -1 }
 module-name-repetitions = "allow"
-
-[profile.release]
-codegen-units = 1
-opt-level = "s"
-debug = false
-strip = true
-lto = true
