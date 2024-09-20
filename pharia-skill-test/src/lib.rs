@@ -131,7 +131,7 @@ mod tests {
     fn can_make_request() {
         drop(dotenvy::dotenv());
 
-        let token = std::env::var("SPIN_VARIABLE_AA_API_TOKEN").unwrap();
+        let token = std::env::var("AA_API_TOKEN").unwrap();
         let csi = TestCsi::aleph_alpha(token);
 
         let response = csi.complete(
