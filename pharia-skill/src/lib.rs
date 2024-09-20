@@ -37,6 +37,9 @@ impl Default for CompletionParams {
 
 /// Pub for macro to work. Internal use only.
 pub mod bindings {
+    use exports::pharia::skill::skill_handler::Error;
+    use serde::Serialize;
+
     use crate::{Completion, CompletionParams};
 
     wit_bindgen::generate!({
@@ -60,13 +63,6 @@ pub mod bindings {
             pharia::skill::csi::complete(&model.into(), &prompt.to_string(), &params)
         }
     }
-}
-
-/// Helpers for macro expansion around skill handlers
-pub mod macro_helpers {
-    use serde::Serialize;
-
-    use crate::Error;
 
     /// Newtype so we can create `From` trait implementations for `anyhow::Result` and `String`.
     pub struct HandlerResult<T: Serialize>(Result<T, Error>);

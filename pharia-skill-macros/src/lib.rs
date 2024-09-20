@@ -16,9 +16,9 @@ pub fn skill(_attr: TokenStream, item: TokenStream) -> TokenStream {
 
             impl ::pharia_skill::bindings::exports::pharia::skill::skill_handler::Guest for Skill {
                 fn run(input: Vec<u8>) -> Result<Vec<u8>, ::pharia_skill::Error> {
-                    let input = ::pharia_skill::macro_helpers::json::from_slice(&input)?;
+                    let input = ::pharia_skill::bindings::json::from_slice(&input)?;
                     let output = super::#func_name(&::pharia_skill::bindings::WasiCsi, input);
-                    ::pharia_skill::macro_helpers::HandlerResult::from(output).into()
+                    ::pharia_skill::bindings::HandlerResult::from(output).into()
                 }
             }
 
