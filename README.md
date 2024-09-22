@@ -10,6 +10,25 @@ Rust SDK for Pharia Kernel Skills
 cargo new --lib hello-world
 ```
 
+### Update `.cargo/config.toml`
+
+Add the name and index URL of the JFrog registry to the global or a local configuration.
+
+```toml
+[registries]
+jfrog = { index = "https://alephalpha.jfrog.io/artifactory/git/pharia-kernel-crates.git" }
+```
+
+### Set JFrog identity token
+
+Configure the JFrog identity token for interacting with the private Cargo registry. This only needs to be done once.
+
+The provided token is stored in `$CARGO_HOME/credentials.toml`.
+
+```sh
+cargo login --registry=jfrog "Bearer <JFROG_TOKEN>"
+```
+
 ### Update `Cargo.toml`
 
 Then update your `Cargo.toml` with some WASM and Kernel specific configuration.
@@ -28,15 +47,13 @@ crate-type = ["cdylib"]
 # For capturing errors in your skill code.
 anyhow = "1.0.89"
 # The Skill SDK for building Kernel Skills
-# TODO: Update with JFrog instructions
-pharia-skill = "0.1.0"
+pharia-skill = { version = "0.1.0", registry = "jfrog" }
 # For deriving custom input and output structs
 serde = { version = "1.0.210", features = ["derive"] }
 
 [dev-dependencies]
-# Helpers for tesitng.
-# TODO: Update with JFrog instructions
-pharia-skill-test = "0.1.0"
+# Helpers for testing.
+pharia-skill-test = { version = "0.1.0", registry = "jfrog" }
 
 [profile.release]
 codegen-units = 1
