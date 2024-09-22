@@ -26,9 +26,9 @@ version = "0.1.0"
 
 [workspace.dependencies]
 # Update these versions as well when updating the workspace version
-pharia-skill = { version = "0.1.0", path = "./pharia-skill" }
-pharia-skill-macros = { version = "0.1.0", path = "./pharia-skill-macros" }
-pharia-skill-test = { version = "0.1.0", path = "./pharia-skill-test" }
+pharia-skill = { path = "./pharia-skill", registry = "jfrog", version = "0.1.0" }
+pharia-skill-macros = { path = "./pharia-skill-macros", registry = "jfrog", version = "0.1.0" }
+pharia-skill-test = { path = "./pharia-skill-test", registry = "jfrog", version = "0.1.0" }
 
 anyhow = "1.0.72"
 dotenvy = "0.15.7"
