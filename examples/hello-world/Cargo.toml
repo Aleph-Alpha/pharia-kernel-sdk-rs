@@ -1,0 +1,31 @@
+[package]
+name = "hello-world"
+authors.workspace = true
+edition.workspace = true
+repository.workspace = true
+readme.workspace = true
+categories.workspace = true
+keywords.workspace = true
+version.workspace = true
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+anyhow.workspace = true
+pharia-skill.workspace = true
+serde.workspace = true
+
+[dev-dependencies]
+pharia-skill-test.workspace = true
+
+[lints]
+workspace = true
+
+# For better optimizations, add the following settings for release
+# [profile.release]
+# codegen-units = 1
+# opt-level = "s"
+# debug = false
+# strip = true
+# lto = true

@@ -1,5 +1,10 @@
 [workspace]
-members = ["pharia-skill", "pharia-skill-macros", "pharia-skill-test"]
+members = [
+    "examples/*",
+    "pharia-skill",
+    "pharia-skill-macros",
+    "pharia-skill-test",
+]
 resolver = "2"
 
 [workspace.package]
@@ -23,6 +28,7 @@ version = "0.1.0"
 # Update these versions as well when updating the workspace version
 pharia-skill = { version = "0.1.0", path = "./pharia-skill" }
 pharia-skill-macros = { version = "0.1.0", path = "./pharia-skill-macros" }
+pharia-skill-test = { version = "0.1.0", path = "./pharia-skill-test" }
 
 anyhow = "1.0.72"
 dotenvy = "0.15.7"
