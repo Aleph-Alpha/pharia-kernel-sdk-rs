@@ -55,16 +55,13 @@ jobs:
           echo "CARGO_REGISTRIES_JFROG_TOKEN=Bearer $JFROG_ACCESS_TOKEN" >> $GITHUB_ENV
 
       - name: Publish pharia-skill-macros
-        working-directory: ./pharia-skill-macros
         run: |
-          cargo publish --registry jfrog
+          cargo publish -p pharia-skill-macros --registry jfrog
 
       - name: Publish pharia-skill
-        working-directory: ./pharia-skill
         run: |
-          cargo publish --registry jfrog
+          cargo publish -p pharia-skill --registry jfrog
 
       - name: Publish pharia-skill-test
-        working-directory: ./pharia-skill-test
         run: |
-          cargo publish --registry jfrog
+          cargo publish -p pharia-skill-test --registry jfrog
