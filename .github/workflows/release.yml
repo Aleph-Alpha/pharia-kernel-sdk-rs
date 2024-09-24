@@ -51,17 +51,15 @@ jobs:
       - name: Configure credentials for JFrog registry
         run: |
           git config --global credential.helper "!f() { echo \"username=${{ env.JFROG_ACCESS_TOKEN_SUBJECT }}\"; echo \"password=${{ env.JFROG_ACCESS_TOKEN }}\"; }; f"
-          echo "CARGO_NET_GIT_FETCH_WITH_CLI=true" >> $GITHUB_ENV
-          echo "CARGO_REGISTRIES_JFROG_TOKEN=Bearer $JFROG_ACCESS_TOKEN" >> $GITHUB_ENV
 
       - name: Publish pharia-skill-macros
         run: |
-          cargo publish -p pharia-skill-macros --registry jfrog
+          cargo publish -p pharia-skill-macros --registry jfrog --token "Bearer $JFROG_ACCESS_TOKEN"
 
       - name: Publish pharia-skill
         run: |
-          cargo publish -p pharia-skill --registry jfrog
+          cargo publish -p pharia-skill --registry jfrog --token "Bearer $JFROG_ACCESS_TOKEN"
 
       - name: Publish pharia-skill-test
         run: |
-          cargo publish -p pharia-skill-test --registry jfrog
+          cargo publish -p pharia-skill-test --registry jfrog --token "Bearer $JFROG_ACCESS_TOKEN"
