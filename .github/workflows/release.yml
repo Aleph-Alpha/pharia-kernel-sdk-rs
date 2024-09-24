@@ -42,9 +42,17 @@ jobs:
           echo "::add-mask::$JFROG_ACCESS_TOKEN"
           echo "JFROG_ACCESS_TOKEN=$JFROG_ACCESS_TOKEN" >> $GITHUB_ENV
 
-      - name: Login to JFrog registry
+      - name: Get Subject from JFrog Access Token
         run: |
-          cargo login --registry jfrog "Bearer ${{ env.JFROG_ACCESS_TOKEN }}"
+          JFROG_ACCESS_TOKEN_SUBJECT=$(echo $JFROG_ACCESS_TOKEN | awk -F '.' '{print $2 "===="}' | fold -w 4 | sed '$ d' | tr -d '\n' | base64 -d | jq '.sub' -r)
+          if [[ -z "$JFROG_ACCESS_TOKEN_SUBJECT" ]]; then exit 1; fi
+          echo "JFROG_ACCESS_TOKEN_SUBJECT=$JFROG_ACCESS_TOKEN_SUBJECT" >> $GITHUB_ENV
+
+      - name: Configure credentials for JFrog registry
+        run: |
+          git config --global credential.helper "!f() { echo \"username=${{ env.JFROG_ACCESS_TOKEN_SUBJECT }}\"; echo \"password=${{ env.JFROG_ACCESS_TOKEN }}\"; }; f"
+          echo "CARGO_NET_GIT_FETCH_WITH_CLI=true" >> $GITHUB_ENV
+          echo "CARGO_REGISTRIES_JFROG_TOKEN=Bearer $JFROG_ACCESS_TOKEN" >> $GITHUB_ENV
 
       - name: Publish pharia-skill-macros
         working-directory: ./pharia-skill-macros
