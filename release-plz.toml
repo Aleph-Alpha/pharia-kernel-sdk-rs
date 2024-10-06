@@ -1,0 +1,14 @@
+[workspace]
+release = false
+
+[[package]]
+name = "pharia-skill-macros"
+release = true
+
+[[package]]
+name = "pharia-skill"
+release = true
+
+[[package]]
+name = "pharia-skill-test"
+release = true
