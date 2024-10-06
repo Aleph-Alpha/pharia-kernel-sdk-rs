@@ -2,7 +2,7 @@ name: Release
 
 on:
   push:
-    branches:
+    branches-ignore:
       - main
 
 env:
@@ -66,3 +66,4 @@ jobs:
           token: "Bearer ${{ env.JFROG_ACCESS_TOKEN }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUST_LOG: trace
