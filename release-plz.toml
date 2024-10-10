@@ -8,6 +8,7 @@ release = true
 
 [[package]]
 name = "pharia-skill"
+changelog_include = ["pharia-skill-macros"]
 changelog_path = "./CHANGELOG.md"
 release = true
 
