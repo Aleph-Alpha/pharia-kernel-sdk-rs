@@ -21,11 +21,9 @@ repository = "https://github.com/Aleph-Alpha/pharia-kernel-sdk-rs"
 readme = "README.md"
 categories = ["API bindings"]
 keywords = ["ai", "llm", "skill"]
-# If you update this, make sure to also update the versions of the local crates as well.
 version = "0.1.0"
 
 [workspace.dependencies]
-# Update these versions as well when updating the workspace version
 pharia-skill = { path = "./pharia-skill", registry = "jfrog", version = "0.1.0" }
 pharia-skill-macros = { path = "./pharia-skill-macros", registry = "jfrog", version = "0.1.0" }
 pharia-skill-test = { path = "./pharia-skill-test", registry = "jfrog", version = "0.1.0" }
