@@ -1,5 +1,6 @@
 [workspace]
 release = false
+release_always = false
 
 [[package]]
 name = "pharia-skill-macros"
