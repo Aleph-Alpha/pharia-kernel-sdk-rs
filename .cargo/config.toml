@@ -1,2 +1,4 @@
 [registries]
-jfrog = { index = "https://alephalpha.jfrog.io/artifactory/git/pharia-kernel-crates.git" }
+jfrog = { index = "sparse+https://alephalpha.jfrog.io/artifactory/api/cargo/pharia-crates/index/", credential-provider = [
+    "cargo:token",
+] }

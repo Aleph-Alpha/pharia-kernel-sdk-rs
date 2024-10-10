@@ -12,11 +12,13 @@ cargo new --lib hello-world
 
 ### Update `.cargo/config.toml`
 
-Add the name and index URL of the JFrog registry to the global or a local configuration.
+Add the name and the index URL of the JFrog registry, as well as a corresponding credential provider to the global or a local Cargo configuration file.
 
 ```toml
 [registries]
-jfrog = { index = "https://alephalpha.jfrog.io/artifactory/git/pharia-kernel-crates.git" }
+jfrog = { index = "sparse+https://alephalpha.jfrog.io/artifactory/api/cargo/pharia-crates/index/", credential-provider = [
+    "cargo:token",
+] }
 ```
 
 ### Set JFrog identity token
