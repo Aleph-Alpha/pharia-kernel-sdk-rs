@@ -16,7 +16,7 @@ Add the name and the index URL of the JFrog registry, as well as a corresponding
 
 ```toml
 [registries]
-jfrog = { index = "sparse+https://alephalpha.jfrog.io/artifactory/api/cargo/pharia-crates/index/", credential-provider = [
+jfrog = { index = "sparse+https://alephalpha.jfrog.io/artifactory/api/cargo/pharia-kernel-crates/index/", credential-provider = [
     "cargo:token",
 ] }
 ```
