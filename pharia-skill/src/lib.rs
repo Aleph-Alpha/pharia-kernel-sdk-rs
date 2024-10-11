@@ -88,7 +88,7 @@ pub mod bindings {
         }
     }
 
-    /// JSON serialization and deserialization helpers for the main skill macro.s
+    /// JSON serialization and deserialization helpers for the main skill macro.
     pub mod json {
         use serde::{Deserialize, Serialize};
 
