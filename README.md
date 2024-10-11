@@ -12,7 +12,7 @@ cargo new --lib hello-world
 
 ### Update `.cargo/config.toml`
 
-Add the name and the index URL of the JFrog registry, as well as a corresponding credential provider to the global or a local Cargo configuration file.
+Add the name and the index URL of the JFrog registry, as well as a corresponding credential provider to the global or a local Cargo configuration file at `.cargo/config.toml`.
 
 ```toml
 [registries]
