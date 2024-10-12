@@ -47,15 +47,15 @@ crate-type = ["cdylib"]
 
 [dependencies]
 # For capturing errors in your skill code.
-anyhow = "1.0.89"
+anyhow = "1"
 # The Skill SDK for building Kernel Skills
-pharia-skill = { version = "0.1.0", registry = "jfrog" }
+pharia-skill = { version = "0.2.0", registry = "jfrog" }
 # For deriving custom input and output structs
-serde = { version = "1.0.210", features = ["derive"] }
+serde = { version = "1", features = ["derive"] }
 
 [dev-dependencies]
 # Helpers for testing.
-pharia-skill-test = { version = "0.1.0", registry = "jfrog" }
+pharia-skill-test = { version = "0.2.0", registry = "jfrog" }
 
 [profile.release]
 codegen-units = 1
