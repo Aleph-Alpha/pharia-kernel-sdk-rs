@@ -51,3 +51,4 @@ unused = { level = "warn", priority = -1 }
 # cargo = { level = "warn", priority = -1 }
 pedantic = { level = "warn", priority = -1 }
 module-name-repetitions = "allow"
+needless-pass-by-value = "allow"

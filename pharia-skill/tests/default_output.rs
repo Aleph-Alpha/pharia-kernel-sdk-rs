@@ -1,12 +1,16 @@
-use pharia_skill::{Completion, CompletionParams, Csi, FinishReason};
+use pharia_skill::{Completion, CompletionParams, CompletionRequest, Csi, FinishReason};
 
 #[pharia_skill::skill]
 fn can_compile(csi: &impl Csi, input: Vec<&str>) -> Vec<String> {
     input
         .into_iter()
         .map(|input| {
-            csi.complete("hello", input, CompletionParams::default())
-                .text
+            csi.complete(&CompletionRequest::new(
+                "hello",
+                input,
+                CompletionParams::default(),
+            ))
+            .text
         })
         .collect()
 }
@@ -14,14 +18,9 @@ fn can_compile(csi: &impl Csi, input: Vec<&str>) -> Vec<String> {
 struct MockCsi;
 
 impl pharia_skill::Csi for MockCsi {
-    fn complete(
-        &self,
-        _model: impl Into<String>,
-        prompt: impl ToString,
-        _params: CompletionParams,
-    ) -> Completion {
+    fn complete(&self, request: &CompletionRequest<'_>) -> Completion {
         Completion {
-            text: prompt.to_string(),
+            text: request.prompt.clone(),
             finish_reason: FinishReason::Stop,
         }
     }

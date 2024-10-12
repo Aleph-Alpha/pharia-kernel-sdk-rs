@@ -1,8 +1,8 @@
 use std::time::Duration;
 
-use pharia_skill::{Completion, CompletionParams, Csi, FinishReason};
+use pharia_skill::{Completion, CompletionRequest, Csi, FinishReason};
 use serde::{de::DeserializeOwned, Serialize};
-use ureq::{json, Agent, AgentBuilder};
+use ureq::{Agent, AgentBuilder};
 
 pub struct MockCsi {
     response: String,
@@ -18,12 +18,7 @@ impl MockCsi {
 }
 
 impl Csi for MockCsi {
-    fn complete(
-        &self,
-        _model: impl Into<String>,
-        _prompt: impl ToString,
-        _params: CompletionParams,
-    ) -> Completion {
+    fn complete(&self, _request: &CompletionRequest<'_>) -> Completion {
         Completion {
             text: self.response.clone(),
             finish_reason: FinishReason::Stop,
@@ -34,12 +29,7 @@ impl Csi for MockCsi {
 pub struct SaboteurCsi;
 
 impl Csi for SaboteurCsi {
-    fn complete(
-        &self,
-        _model: impl Into<String>,
-        _prompt: impl ToString,
-        _params: CompletionParams,
-    ) -> Completion {
+    fn complete(&self, _request: &CompletionRequest<'_>) -> Completion {
         panic!("sabotage")
     }
 }
@@ -103,25 +93,15 @@ impl DevCsi {
 }
 
 impl Csi for DevCsi {
-    fn complete(
-        &self,
-        model: impl Into<String>,
-        prompt: impl ToString,
-        params: CompletionParams,
-    ) -> Completion {
-        self.csi_request(
-            Function::Complete,
-            json!({
-                "model": model.into(),
-                "prompt": prompt.to_string(),
-                "params": params,
-            }),
-        )
+    fn complete(&self, request: &CompletionRequest<'_>) -> Completion {
+        self.csi_request(Function::Complete, request)
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use pharia_skill::CompletionParams;
+
     use super::*;
 
     #[test]
@@ -131,7 +111,7 @@ mod tests {
         let token = std::env::var("AA_API_TOKEN").unwrap();
         let csi = DevCsi::aleph_alpha(token);
 
-        let response = csi.complete(
+        let response = csi.complete(&CompletionRequest::new(
             "llama-3.1-8b-instruct",
             "<|begin_of_text|><|start_header_id|>system<|end_header_id|>
 
@@ -142,14 +122,14 @@ You are a helpful assistant<|eot_id|><|start_header_id|>user<|end_header_id|>
 
 What is the capital of France?<|eot_id|><|start_header_id|>assistant<|end_header_id|>",
             CompletionParams {
-                stop: vec![
-                    "<|start_header_id|>".to_owned(),
-                    "<|eom_id|>".to_owned(),
-                    "<|eot_id|>".to_owned(),
+                stop: &[
+                    "<|start_header_id|>".into(),
+                    "<|eom_id|>".into(),
+                    "<|eot_id|>".into(),
                 ],
                 ..Default::default()
             },
-        );
+        ));
         assert_eq!(response.text.trim(), "The capital of France is Paris.");
     }
 }
