@@ -1,7 +1,8 @@
 use std::time::Duration;
 
 use pharia_skill::{Completion, CompletionParams, Csi, FinishReason};
-use ureq::{json, serde_json::Value, Agent, AgentBuilder};
+use serde::{de::DeserializeOwned, Serialize};
+use ureq::{json, Agent, AgentBuilder};
 
 pub struct MockCsi {
     response: String,
@@ -43,17 +44,30 @@ impl Csi for SaboteurCsi {
     }
 }
 
+#[derive(Serialize)]
+struct CsiRequest<'a, P: Serialize> {
+    version: &'a str,
+    function: &'a str,
+    #[serde(flatten)]
+    payload: P,
+}
+
 /// A Csi implementation that can be used for testing within normal Rust targets.
-pub struct TestCsi {
+pub struct DevCsi {
     address: String,
     agent: Agent,
     token: String,
 }
 
-impl TestCsi {
+impl DevCsi {
+    /// The version of the API we are calling against
+    const VERSION: &str = "0.2";
+
     #[must_use]
     pub fn new(address: impl Into<String>, token: impl Into<String>) -> Self {
-        let agent = AgentBuilder::new().timeout(Duration::from_secs(60)).build();
+        let agent = AgentBuilder::new()
+            .timeout(Duration::from_secs(60 * 5))
+            .build();
         Self {
             address: address.into(),
             agent,
@@ -61,65 +75,42 @@ impl TestCsi {
         }
     }
 
+    /// Construct a new [`DevCsi`] that points to the Aleph Alpha hosted Kernel
     pub fn aleph_alpha(token: impl Into<String>) -> Self {
-        let address = "https://api.aleph-alpha.com";
-        Self::new(address, token)
+        Self::new("https://pharia-kernel.aleph-alpha.stackit.run", token)
     }
 
-    fn complete_reqest(
-        &self,
-        model: impl Into<String>,
-        prompt: &str,
-        params: CompletionParams,
-    ) -> Completion {
-        let CompletionParams {
-            max_tokens,
-            temperature,
-            top_k,
-            top_p,
-            stop,
-        } = params;
-        let json = json!({
-            "prompt": prompt.to_string(),
-            "model": model.into(),
-            "maximum_tokens": max_tokens,
-            "temperature": temperature,
-            "top_k": top_k,
-            "top_p": top_p,
-            "stop_sequences": stop
-        });
-        let resp = self
-            .agent
-            .post(&format!("{}/complete", &self.address))
+    fn csi_request<R: DeserializeOwned>(&self, function: &str, payload: impl Serialize) -> R {
+        let json = CsiRequest {
+            version: Self::VERSION,
+            function,
+            payload,
+        };
+        self.agent
+            .post(&format!("{}/csi", &self.address))
             .set("Authorization", &format!("Bearer {}", self.token))
             .send_json(json)
             .unwrap()
-            .into_json::<Value>()
-            .unwrap();
-
-        let completion = &resp["completions"][0];
-
-        let finish_reason = match completion["finish_reason"].as_str().unwrap() {
-            "stop" | "end_of_text" => FinishReason::Stop,
-            "length" | "maximum_tokens" => FinishReason::Length,
-            "content_filter" => FinishReason::ContentFilter,
-            s => panic!("Invalid FinishReason: {s}"),
-        };
-        Completion {
-            text: completion["completion"].as_str().unwrap().to_owned(),
-            finish_reason,
-        }
+            .into_json::<R>()
+            .unwrap()
     }
 }
 
-impl Csi for TestCsi {
+impl Csi for DevCsi {
     fn complete(
         &self,
         model: impl Into<String>,
         prompt: impl ToString,
         params: CompletionParams,
     ) -> Completion {
-        self.complete_reqest(model, &prompt.to_string(), params)
+        self.csi_request(
+            "complete",
+            json!({
+                "model": model.into(),
+                "prompt": prompt.to_string(),
+                "params": params,
+            }),
+        )
     }
 }
 
@@ -132,7 +123,7 @@ mod tests {
         drop(dotenvy::dotenv());
 
         let token = std::env::var("AA_API_TOKEN").unwrap();
-        let csi = TestCsi::aleph_alpha(token);
+        let csi = DevCsi::aleph_alpha(token);
 
         let response = csi.complete(
             "llama-3.1-8b-instruct",
