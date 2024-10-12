@@ -10,7 +10,7 @@ struct MockCsi;
 impl pharia_skill::Csi for MockCsi {
     fn complete(&self, request: &CompletionRequest<'_>) -> Completion {
         Completion {
-            text: request.prompt.clone(),
+            text: request.prompt.clone().into_owned(),
             finish_reason: FinishReason::Stop,
         }
     }

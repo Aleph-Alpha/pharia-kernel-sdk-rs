@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use pharia_skill::{Completion, CompletionRequest, Csi, FinishReason};
 use serde::{de::DeserializeOwned, Serialize};
-use ureq::{Agent, AgentBuilder};
+use ureq::{json, Agent, AgentBuilder};
 
 pub struct MockCsi {
     response: String,
@@ -26,18 +26,11 @@ impl Csi for MockCsi {
     }
 }
 
-pub struct SaboteurCsi;
-
-impl Csi for SaboteurCsi {
-    fn complete(&self, _request: &CompletionRequest<'_>) -> Completion {
-        panic!("sabotage")
-    }
-}
-
 #[derive(Copy, Clone, Debug, Serialize)]
 #[serde(rename_all = "snake_case")]
 enum Function {
     Complete,
+    CompleteAll,
 }
 
 #[derive(Serialize)]
@@ -96,6 +89,10 @@ impl Csi for DevCsi {
     fn complete(&self, request: &CompletionRequest<'_>) -> Completion {
         self.csi_request(Function::Complete, request)
     }
+
+    fn complete_all(&self, requests: &[CompletionRequest<'_>]) -> Vec<Completion> {
+        self.csi_request(Function::CompleteAll, json!({"requests": requests}))
+    }
 }
 
 #[cfg(test)]
@@ -122,14 +119,40 @@ You are a helpful assistant<|eot_id|><|start_header_id|>user<|end_header_id|>
 
 What is the capital of France?<|eot_id|><|start_header_id|>assistant<|end_header_id|>",
             CompletionParams {
-                stop: &[
-                    "<|start_header_id|>".into(),
-                    "<|eom_id|>".into(),
-                    "<|eot_id|>".into(),
-                ],
+                stop: &["<|start_header_id|>".into()],
                 ..Default::default()
             },
         ));
         assert_eq!(response.text.trim(), "The capital of France is Paris.");
+    }
+
+    #[test]
+    fn can_make_multiple_requests() {
+        drop(dotenvy::dotenv());
+
+        let token = std::env::var("AA_API_TOKEN").unwrap();
+        let csi = DevCsi::aleph_alpha(token);
+
+        let params = CompletionParams {
+            stop: &["<|start_header_id|>".into()],
+            ..Default::default()
+        };
+        let completion_request = CompletionRequest::new(
+            "llama-3.1-8b-instruct",
+            "<|begin_of_text|><|start_header_id|>system<|end_header_id|>
+
+Cutting Knowledge Date: December 2023
+Today Date: 23 Jul 2024
+
+You are a helpful assistant<|eot_id|><|start_header_id|>user<|end_header_id|>
+
+What is the capital of France?<|eot_id|><|start_header_id|>assistant<|end_header_id|>",
+            params,
+        );
+
+        let response = csi.complete_all(&vec![completion_request; 2]);
+        assert!(response
+            .into_iter()
+            .all(|r| r.text.trim() == "The capital of France is Paris."));
     }
 }

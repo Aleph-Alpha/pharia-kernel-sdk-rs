@@ -11,6 +11,14 @@ use serde::{Deserialize, Serialize};
 pub trait Csi {
     /// Generate a completion for a given prompt using a specific model.
     fn complete(&self, request: &CompletionRequest<'_>) -> Completion;
+
+    /// Process multiple completion requests at once
+    fn complete_all(&self, requests: &[CompletionRequest<'_>]) -> Vec<Completion> {
+        requests
+            .iter()
+            .map(|request| self.complete(request))
+            .collect()
+    }
 }
 
 /// The reason that the model stopped completing text
@@ -59,7 +67,7 @@ pub struct CompletionRequest<'a> {
     /// The model to generate a completion from.
     pub model: Cow<'a, str>,
     /// The text to prompt the model with.
-    pub prompt: String,
+    pub prompt: Cow<'a, str>,
     /// Parameters to adjust the sampling behavior of the model.
     pub params: CompletionParams<'a>,
 }
@@ -72,7 +80,7 @@ impl<'a> CompletionRequest<'a> {
     ) -> Self {
         Self {
             model: model.into(),
-            prompt: prompt.to_string(),
+            prompt: prompt.to_string().into(),
             params,
         }
     }
@@ -101,6 +109,25 @@ pub mod bindings {
             Self {
                 text,
                 finish_reason: finish_reason.into(),
+            }
+        }
+    }
+
+    impl<'a> From<CompletionParams<'a>> for pharia::skill::csi::CompletionParams {
+        fn from(value: CompletionParams<'a>) -> Self {
+            let CompletionParams {
+                max_tokens,
+                temperature,
+                top_k,
+                top_p,
+                stop,
+            } = value;
+            Self {
+                max_tokens,
+                temperature,
+                top_k,
+                top_p,
+                stop: stop.iter().map(|s| s.clone().into_owned()).collect(),
             }
         }
     }
@@ -134,6 +161,21 @@ pub mod bindings {
         }
     }
 
+    impl<'a> From<&CompletionRequest<'a>> for pharia::skill::csi::CompletionRequest {
+        fn from(value: &CompletionRequest<'a>) -> Self {
+            let CompletionRequest {
+                model,
+                prompt,
+                params,
+            } = value;
+            Self {
+                model: model.clone().into_owned(),
+                prompt: prompt.clone().into_owned(),
+                params: params.into(),
+            }
+        }
+    }
+
     /// CSI implementation for the WASI environment.
     pub struct WasiCsi;
 
@@ -141,6 +183,13 @@ pub mod bindings {
         fn complete(&self, request: &CompletionRequest<'_>) -> crate::Completion {
             pharia::skill::csi::complete(&request.model, &request.prompt, &(&request.params).into())
                 .into()
+        }
+
+        fn complete_all(&self, requests: &[CompletionRequest<'_>]) -> Vec<Completion> {
+            pharia::skill::csi::complete_all(&requests.iter().map(Into::into).collect::<Vec<_>>())
+                .into_iter()
+                .map(Into::into)
+                .collect()
         }
     }
 
