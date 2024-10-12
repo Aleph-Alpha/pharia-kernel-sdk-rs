@@ -44,10 +44,16 @@ impl Csi for SaboteurCsi {
     }
 }
 
+#[derive(Copy, Clone, Debug, Serialize)]
+#[serde(rename_all = "snake_case")]
+enum Function {
+    Complete,
+}
+
 #[derive(Serialize)]
 struct CsiRequest<'a, P: Serialize> {
     version: &'a str,
-    function: &'a str,
+    function: Function,
     #[serde(flatten)]
     payload: P,
 }
@@ -80,7 +86,7 @@ impl DevCsi {
         Self::new("https://pharia-kernel.aleph-alpha.stackit.run", token)
     }
 
-    fn csi_request<R: DeserializeOwned>(&self, function: &str, payload: impl Serialize) -> R {
+    fn csi_request<R: DeserializeOwned>(&self, function: Function, payload: impl Serialize) -> R {
         let json = CsiRequest {
             version: Self::VERSION,
             function,
@@ -104,7 +110,7 @@ impl Csi for DevCsi {
         params: CompletionParams,
     ) -> Completion {
         self.csi_request(
-            "complete",
+            Function::Complete,
             json!({
                 "model": model.into(),
                 "prompt": prompt.to_string(),
