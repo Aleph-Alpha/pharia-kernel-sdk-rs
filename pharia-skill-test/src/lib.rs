@@ -24,6 +24,10 @@ impl Csi for MockCsi {
             finish_reason: FinishReason::Stop,
         }
     }
+
+    fn chunk(&self, text: &str, _params: &pharia_skill::ChunkParams<'_>) -> Vec<String> {
+        vec![text.to_owned()]
+    }
 }
 
 #[derive(Copy, Clone, Debug, Serialize)]
@@ -31,6 +35,7 @@ impl Csi for MockCsi {
 enum Function {
     Complete,
     CompleteAll,
+    Chunk,
 }
 
 #[derive(Serialize)]
@@ -93,11 +98,15 @@ impl Csi for DevCsi {
     fn complete_all(&self, requests: &[CompletionRequest<'_>]) -> Vec<Completion> {
         self.csi_request(Function::CompleteAll, json!({"requests": requests}))
     }
+
+    fn chunk(&self, text: &str, params: &pharia_skill::ChunkParams<'_>) -> Vec<String> {
+        self.csi_request(Function::Chunk, json!({"text": text, "params": params}))
+    }
 }
 
 #[cfg(test)]
 mod tests {
-    use pharia_skill::CompletionParams;
+    use pharia_skill::{ChunkParams, CompletionParams};
 
     use super::*;
 
@@ -154,5 +163,17 @@ What is the capital of France?<|eot_id|><|start_header_id|>assistant<|end_header
         assert!(response
             .into_iter()
             .all(|r| r.text.trim() == "The capital of France is Paris."));
+    }
+
+    #[test]
+    fn chunk() {
+        drop(dotenvy::dotenv());
+
+        let token = std::env::var("AA_API_TOKEN").unwrap();
+        let csi = DevCsi::aleph_alpha(token);
+
+        let response = csi.chunk("123456", &ChunkParams::new("llama-3.1-8b-instruct", 1));
+
+        assert_eq!(response, vec!["123", "456"]);
     }
 }

@@ -22,6 +22,10 @@ impl pharia_skill::Csi for MockCsi {
             finish_reason: FinishReason::Stop,
         }
     }
+
+    fn chunk(&self, text: &str, _params: &pharia_skill::ChunkParams<'_>) -> Vec<String> {
+        vec![text.to_owned()]
+    }
 }
 
 #[test]
