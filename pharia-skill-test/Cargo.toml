@@ -12,6 +12,7 @@ keywords.workspace = true
 
 [dependencies]
 pharia-skill.workspace = true
+serde.workspace = true
 ureq.workspace = true
 
 [lints]

@@ -238,6 +238,7 @@ version = "0.1.1"
 dependencies = [
  "dotenvy",
  "pharia-skill",
+ "serde",
  "ureq",
 ]
 
