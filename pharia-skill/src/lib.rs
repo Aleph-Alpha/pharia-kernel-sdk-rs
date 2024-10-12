@@ -1,11 +1,11 @@
 pub mod prompt;
 
+use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 
 pub use bindings::exports::pharia::skill::skill_handler::Error;
 /// Macro to define a Skill. It wraps a function that takes a single argument and returns a single value.
 pub use pharia_skill_macros::skill;
-use serde::{Deserialize, Serialize};
 
 /// Cognitive System Interface
 pub trait Csi {

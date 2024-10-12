@@ -70,30 +70,31 @@ lto = true
 With this setup, you should be able to start writing a basic Skill component. Your input and output can be anything that implements `serde`'s `Deserialize` for your input and `Serialize` for your output.
 
 ```rust
-use pharia_skill::{skill, CompletionParams, Csi};
+use pharia_skill::{
+    prompt::llama3_instruct::Prompt, skill, CompletionParams, CompletionRequest, Csi,
+};
 
 // This can also return an `anyhow::Result<String>` if you need handle errors.
 #[skill]
 fn hello_world(csi: &impl Csi, name: &str) -> String {
-    let prompt = format!(
-        "<|begin_of_text|><|start_header_id|>system<|end_header_id|>
-
-Cutting Knowledge Date: December 2023
+    let prompt = Prompt::new(
+        "Cutting Knowledge Date: December 2023
 Today Date: 23 Jul 2024
 
-You are a helpful assistant.<|eot_id|><|start_header_id|>user<|end_header_id|>
+You are a helpful assistant.",
+    )
+    .with_user_message(format!(
+        "Provide a nice greeting for the person named: {name}"
+    ));
 
-Provide a nice greeting for the person named: {name}<|eot_id|><|start_header_id|>assistant<|end_header_id|>"
-    );
-
-    let result = csi.complete(
+    let result = csi.complete(&CompletionRequest::new(
         "llama-3.1-8b-instruct",
         prompt,
         CompletionParams {
-            stop: vec!["<|start_header_id|>".to_owned()],
+            stop: &["<|start_header_id|>".into()],
             ..Default::default()
         },
-    );
+    ));
 
     result.text
 }
