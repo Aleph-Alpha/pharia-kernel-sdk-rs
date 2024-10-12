@@ -1,4 +1,4 @@
-use pharia_skill::{Completion, CompletionParams, Csi, FinishReason};
+use pharia_skill::{Completion, CompletionRequest, Csi, FinishReason};
 
 #[pharia_skill::skill]
 fn can_compile_with_result(_csi: &impl Csi, _input: &str) -> anyhow::Result<String> {
@@ -8,14 +8,9 @@ fn can_compile_with_result(_csi: &impl Csi, _input: &str) -> anyhow::Result<Stri
 struct MockCsi;
 
 impl pharia_skill::Csi for MockCsi {
-    fn complete(
-        &self,
-        _model: impl Into<String>,
-        prompt: impl ToString,
-        _params: CompletionParams,
-    ) -> Completion {
+    fn complete(&self, request: &CompletionRequest<'_>) -> Completion {
         Completion {
-            text: prompt.to_string(),
+            text: request.prompt.clone(),
             finish_reason: FinishReason::Stop,
         }
     }

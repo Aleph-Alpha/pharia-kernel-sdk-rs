@@ -1,4 +1,6 @@
-use pharia_skill::{prompt::llama3_instruct::Prompt, skill, CompletionParams, Csi};
+use pharia_skill::{
+    prompt::llama3_instruct::Prompt, skill, CompletionParams, CompletionRequest, Csi,
+};
 
 // This can also return an `anyhow::Result<String>` if you need handle errors.
 #[skill]
@@ -13,14 +15,14 @@ You are a helpful assistant.",
         "Provide a nice greeting for the person named: {name}"
     ));
 
-    let result = csi.complete(
+    let result = csi.complete(&CompletionRequest::new(
         "llama-3.1-8b-instruct",
         prompt,
         CompletionParams {
-            stop: vec!["<|start_header_id|>".to_owned()],
+            stop: &["<|start_header_id|>".into()],
             ..Default::default()
         },
-    );
+    ));
 
     result.text
 }

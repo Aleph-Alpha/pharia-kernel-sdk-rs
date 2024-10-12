@@ -1,5 +1,7 @@
 pub mod prompt;
 
+use std::borrow::Cow;
+
 pub use bindings::exports::pharia::skill::skill_handler::Error;
 /// Macro to define a Skill. It wraps a function that takes a single argument and returns a single value.
 pub use pharia_skill_macros::skill;
@@ -8,19 +10,11 @@ use serde::{Deserialize, Serialize};
 /// Cognitive System Interface
 pub trait Csi {
     /// Generate a completion for a given prompt using a specific model.
-    ///
-    /// # Errors
-    /// Will error if the completion fails due to invalid input.
-    fn complete(
-        &self,
-        model: impl Into<String>,
-        prompt: impl ToString,
-        params: CompletionParams,
-    ) -> Completion;
+    fn complete(&self, request: &CompletionRequest<'_>) -> Completion;
 }
 
 /// The reason that the model stopped completing text
-#[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd, Deserialize)]
+#[derive(Clone, Copy, Debug, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum FinishReason {
     /// The model hit a natural stopping point or a provided stop sequence
@@ -43,7 +37,7 @@ pub struct Completion {
 
 /// Completion request parameters
 #[derive(Clone, Debug, Default, Serialize)]
-pub struct CompletionParams {
+pub struct CompletionParams<'a> {
     /// The maximum tokens that should be inferred.
     ///
     /// Note: the backing implementation may return less tokens due to
@@ -56,7 +50,32 @@ pub struct CompletionParams {
     /// The probability total of next tokens the model will choose from.
     pub top_p: Option<f64>,
     /// A list of sequences that, if encountered, the API will stop generating further tokens.
-    pub stop: Vec<String>,
+    pub stop: &'a [Cow<'a, str>],
+}
+
+/// Parameters required to make a completion request.
+#[derive(Clone, Debug, Serialize)]
+pub struct CompletionRequest<'a> {
+    /// The model to generate a completion from.
+    pub model: Cow<'a, str>,
+    /// The text to prompt the model with.
+    pub prompt: String,
+    /// Parameters to adjust the sampling behavior of the model.
+    pub params: CompletionParams<'a>,
+}
+
+impl<'a> CompletionRequest<'a> {
+    pub fn new(
+        model: impl Into<Cow<'a, str>>,
+        prompt: impl ToString,
+        params: CompletionParams<'a>,
+    ) -> Self {
+        Self {
+            model: model.into(),
+            prompt: prompt.to_string(),
+            params,
+        }
+    }
 }
 
 /// Pub for macro to work. Internal use only.
@@ -64,7 +83,7 @@ pub mod bindings {
     use exports::pharia::skill::skill_handler::Error;
     use serde::Serialize;
 
-    use crate::{Completion, CompletionParams, FinishReason};
+    use crate::{Completion, CompletionParams, CompletionRequest, FinishReason};
 
     wit_bindgen::generate!({
         world: "skill",
@@ -86,8 +105,8 @@ pub mod bindings {
         }
     }
 
-    impl From<CompletionParams> for pharia::skill::csi::CompletionParams {
-        fn from(value: CompletionParams) -> Self {
+    impl<'a> From<&CompletionParams<'a>> for pharia::skill::csi::CompletionParams {
+        fn from(value: &CompletionParams<'a>) -> Self {
             let CompletionParams {
                 max_tokens,
                 temperature,
@@ -96,11 +115,11 @@ pub mod bindings {
                 stop,
             } = value;
             Self {
-                max_tokens,
-                temperature,
-                top_k,
-                top_p,
-                stop,
+                max_tokens: *max_tokens,
+                temperature: *temperature,
+                top_k: *top_k,
+                top_p: *top_p,
+                stop: stop.iter().map(|s| s.clone().into_owned()).collect(),
             }
         }
     }
@@ -119,13 +138,9 @@ pub mod bindings {
     pub struct WasiCsi;
 
     impl super::Csi for WasiCsi {
-        fn complete(
-            &self,
-            model: impl Into<String>,
-            prompt: impl ToString,
-            params: crate::CompletionParams,
-        ) -> crate::Completion {
-            pharia::skill::csi::complete(&model.into(), &prompt.to_string(), &params.into()).into()
+        fn complete(&self, request: &CompletionRequest<'_>) -> crate::Completion {
+            pharia::skill::csi::complete(&request.model, &request.prompt, &(&request.params).into())
+                .into()
         }
     }
 
