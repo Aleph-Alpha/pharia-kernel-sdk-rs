@@ -19,6 +19,10 @@ pub trait Csi {
             .map(|request| self.complete(request))
             .collect()
     }
+
+    /// Chunk the given text into smaller pieces that fit within the
+    /// maximum token amount for a given model.
+    fn chunk(&self, text: &str, params: &ChunkParams<'_>) -> Vec<String>;
 }
 
 /// The reason that the model stopped completing text
@@ -86,12 +90,31 @@ impl<'a> CompletionRequest<'a> {
     }
 }
 
+/// Chunking parameters
+#[derive(Clone, Debug, Serialize)]
+pub struct ChunkParams<'a> {
+    /// The name of the model the chunk is intended to be used for.
+    /// This must be a known model.
+    pub model: Cow<'a, str>,
+    /// The maximum number of tokens that should be returned per chunk.
+    pub max_tokens: u32,
+}
+
+impl<'a> ChunkParams<'a> {
+    pub fn new(model: impl Into<Cow<'a, str>>, max_tokens: u32) -> Self {
+        Self {
+            model: model.into(),
+            max_tokens,
+        }
+    }
+}
+
 /// Pub for macro to work. Internal use only.
 pub mod bindings {
     use exports::pharia::skill::skill_handler::Error;
     use serde::Serialize;
 
-    use crate::{Completion, CompletionParams, CompletionRequest, FinishReason};
+    use crate::{ChunkParams, Completion, CompletionParams, CompletionRequest, FinishReason};
 
     wit_bindgen::generate!({
         world: "skill",
@@ -176,6 +199,16 @@ pub mod bindings {
         }
     }
 
+    impl<'a> From<&ChunkParams<'a>> for pharia::skill::csi::ChunkParams {
+        fn from(value: &ChunkParams<'a>) -> Self {
+            let ChunkParams { model, max_tokens } = value;
+            Self {
+                model: model.clone().into_owned(),
+                max_tokens: *max_tokens,
+            }
+        }
+    }
+
     /// CSI implementation for the WASI environment.
     pub struct WasiCsi;
 
@@ -190,6 +223,10 @@ pub mod bindings {
                 .into_iter()
                 .map(Into::into)
                 .collect()
+        }
+
+        fn chunk(&self, text: &str, params: &ChunkParams<'_>) -> Vec<String> {
+            pharia::skill::csi::chunk(text, &params.into())
         }
     }
 
