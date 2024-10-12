@@ -1,7 +1,9 @@
 pub mod prompt;
 
-use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
+
+use serde::{Deserialize, Serialize};
+use strum::{EnumIter, IntoEnumIterator};
 
 pub use bindings::exports::pharia::skill::skill_handler::Error;
 /// Macro to define a Skill. It wraps a function that takes a single argument and returns a single value.
@@ -23,10 +25,17 @@ pub trait Csi {
     /// Chunk the given text into smaller pieces that fit within the
     /// maximum token amount for a given model.
     fn chunk(&self, text: &str, params: &ChunkParams<'_>) -> Vec<String>;
+
+    /// Select the detected language for the provided input based on the list of possible languages.
+    /// If no language matches, None is returned.
+    ///
+    /// text: Text input
+    /// languages: All languages that should be considered during detection.
+    fn select_language(&self, text: &str, languages: &[Language]) -> Option<Language>;
 }
 
 /// The reason that the model stopped completing text
-#[derive(Clone, Copy, Debug, Deserialize)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "snake_case")]
 pub enum FinishReason {
     /// The model hit a natural stopping point or a provided stop sequence
@@ -109,12 +118,33 @@ impl<'a> ChunkParams<'a> {
     }
 }
 
+/// Available languages for language selection.
+/// Variants named after ISO 639-3 codes.
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, EnumIter, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum Language {
+    /// English
+    Eng,
+    /// German
+    Deu,
+}
+
+impl Language {
+    /// Return a list of all available languages
+    #[must_use]
+    pub fn all() -> Vec<Self> {
+        Self::iter().collect()
+    }
+}
+
 /// Pub for macro to work. Internal use only.
 pub mod bindings {
     use exports::pharia::skill::skill_handler::Error;
     use serde::Serialize;
 
-    use crate::{ChunkParams, Completion, CompletionParams, CompletionRequest, FinishReason};
+    use crate::{
+        ChunkParams, Completion, CompletionParams, CompletionRequest, FinishReason, Language,
+    };
 
     wit_bindgen::generate!({
         world: "skill",
@@ -209,6 +239,24 @@ pub mod bindings {
         }
     }
 
+    impl From<Language> for pharia::skill::csi::Language {
+        fn from(value: Language) -> Self {
+            match value {
+                Language::Eng => Self::Eng,
+                Language::Deu => Self::Deu,
+            }
+        }
+    }
+
+    impl From<pharia::skill::csi::Language> for Language {
+        fn from(value: pharia::skill::csi::Language) -> Self {
+            match value {
+                pharia::skill::csi::Language::Eng => Self::Eng,
+                pharia::skill::csi::Language::Deu => Self::Deu,
+            }
+        }
+    }
+
     /// CSI implementation for the WASI environment.
     pub struct WasiCsi;
 
@@ -227,6 +275,14 @@ pub mod bindings {
 
         fn chunk(&self, text: &str, params: &ChunkParams<'_>) -> Vec<String> {
             pharia::skill::csi::chunk(text, &params.into())
+        }
+
+        fn select_language(&self, text: &str, languages: &[Language]) -> Option<Language> {
+            pharia::skill::csi::select_language(
+                text,
+                &languages.iter().map(|&l| l.into()).collect::<Vec<_>>(),
+            )
+            .map(Into::into)
         }
     }
 
