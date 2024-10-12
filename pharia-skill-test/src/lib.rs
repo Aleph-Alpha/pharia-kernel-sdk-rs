@@ -1,8 +1,27 @@
 use std::time::Duration;
 
-use pharia_skill::{Completion, CompletionRequest, Csi, FinishReason};
+use pharia_skill::{Completion, CompletionRequest, Csi, FinishReason, Language};
 use serde::{de::DeserializeOwned, Serialize};
 use ureq::{json, Agent, AgentBuilder};
+
+pub struct StubCsi;
+
+impl Csi for StubCsi {
+    fn complete(&self, request: &CompletionRequest<'_>) -> Completion {
+        Completion {
+            text: request.prompt.clone().into_owned(),
+            finish_reason: FinishReason::Stop,
+        }
+    }
+
+    fn chunk(&self, text: &str, _params: &pharia_skill::ChunkParams<'_>) -> Vec<String> {
+        vec![text.to_owned()]
+    }
+
+    fn select_language(&self, _text: &str, _languages: &[Language]) -> Option<Language> {
+        None
+    }
+}
 
 pub struct MockCsi {
     response: String,
@@ -28,6 +47,14 @@ impl Csi for MockCsi {
     fn chunk(&self, text: &str, _params: &pharia_skill::ChunkParams<'_>) -> Vec<String> {
         vec![text.to_owned()]
     }
+
+    fn select_language(
+        &self,
+        _text: &str,
+        _languages: &[pharia_skill::Language],
+    ) -> Option<pharia_skill::Language> {
+        None
+    }
 }
 
 #[derive(Copy, Clone, Debug, Serialize)]
@@ -36,6 +63,7 @@ enum Function {
     Complete,
     CompleteAll,
     Chunk,
+    SelectLanguage,
 }
 
 #[derive(Serialize)]
@@ -101,6 +129,17 @@ impl Csi for DevCsi {
 
     fn chunk(&self, text: &str, params: &pharia_skill::ChunkParams<'_>) -> Vec<String> {
         self.csi_request(Function::Chunk, json!({"text": text, "params": params}))
+    }
+
+    fn select_language(
+        &self,
+        text: &str,
+        languages: &[pharia_skill::Language],
+    ) -> Option<pharia_skill::Language> {
+        self.csi_request(
+            Function::SelectLanguage,
+            json!({"text": text, "languages": languages}),
+        )
     }
 }
 
@@ -175,5 +214,17 @@ What is the capital of France?<|eot_id|><|start_header_id|>assistant<|end_header
         let response = csi.chunk("123456", &ChunkParams::new("llama-3.1-8b-instruct", 1));
 
         assert_eq!(response, vec!["123", "456"]);
+    }
+
+    #[test]
+    fn select_language() {
+        drop(dotenvy::dotenv());
+
+        let token = std::env::var("AA_API_TOKEN").unwrap();
+        let csi = DevCsi::aleph_alpha(token);
+
+        let response = csi.select_language("A rising tide lifts all boats", &Language::all());
+
+        assert_eq!(response, Some(Language::Eng));
     }
 }

@@ -19,4 +19,5 @@ ureq.workspace = true
 workspace = true
 
 [dev-dependencies]
+anyhow.workspace = true
 dotenvy.workspace = true
