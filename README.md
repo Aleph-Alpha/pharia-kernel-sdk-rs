@@ -137,16 +137,16 @@ cargo test
 
 To deploy your skill, you will need to compile for WASM, specifically a WASM WASI target.
 
-First you will need to make sure you have the `wasm32-wasip1` target installed:
+First you will need to make sure you have the `wasm32-wasip2` target installed, which is available as of Rust v1.82.0:
 
 ```sh
-rustup target add wasm32-wasip1
+rustup target add wasm32-wasip2
 ```
 
 Now you should be able to compile your skill:
 
 ```sh
-cargo build --target wasm32-wasip1 --release
+cargo build --target wasm32-wasip2 --release
 ```
 
-You can now find your compiled component in your `target` directory, like `target/wasm32-wasip1/release/hello_world.wasm`
+You can now find your compiled component in your `target` directory, like `target/wasm32-wasip2/release/hello_world.wasm`
