@@ -28,7 +28,7 @@ pharia-skill = { path = "./pharia-skill", registry = "jfrog", version = "0.2.0" 
 pharia-skill-macros = { path = "./pharia-skill-macros", registry = "jfrog", version = "0.2.0" }
 pharia-skill-test = { path = "./pharia-skill-test", registry = "jfrog", version = "0.2.0" }
 
-anyhow = "^1.0.92"
+anyhow = "^1.0.93"
 dotenvy = "0.15"
 quote = "^1.0.35"
 serde = { version = "^1.0.214", features = ["derive"] }
