@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.1](https://github.com/Aleph-Alpha/pharia-kernel-sdk-rs/compare/pharia-skill-test-v0.2.0...pharia-skill-test-v0.2.1)
+
+### Features
+
+- Add search to sdk - ([f24f416](https://github.com/Aleph-Alpha/pharia-kernel-sdk-rs/commit/f24f4160a7f3d5e37caefebd7d829f980ade1c49))
+
+
 ## [0.2.0](https://github.com/Aleph-Alpha/pharia-kernel-sdk-rs/compare/pharia-skill-test-v0.1.1...pharia-skill-test-v0.2.0)
 
 ### Features
