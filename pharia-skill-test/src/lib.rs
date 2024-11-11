@@ -1,7 +1,8 @@
 use std::time::Duration;
 
 use pharia_skill::{
-    Completion, CompletionRequest, Csi, FinishReason, IndexPath, Language, SearchResult,
+    ChatRequest, ChatResponse, Completion, CompletionRequest, Csi, FinishReason, IndexPath,
+    Language, Message, Role, SearchResult,
 };
 use serde::{de::DeserializeOwned, Serialize};
 use ureq::{json, Agent, AgentBuilder};
@@ -32,6 +33,16 @@ impl Csi for StubCsi {
         _min_score: Option<f64>,
     ) -> Vec<SearchResult> {
         vec![]
+    }
+
+    fn chat(&self, _request: &ChatRequest<'_>) -> ChatResponse<'_> {
+        ChatResponse {
+            message: Message {
+                role: Role::User,
+                content: "".into(),
+            },
+            finish_reason: FinishReason::Stop,
+        }
     }
 }
 
@@ -77,6 +88,16 @@ impl Csi for MockCsi {
     ) -> Vec<SearchResult> {
         vec![]
     }
+
+    fn chat(&self, _request: &ChatRequest<'_>) -> ChatResponse<'_> {
+        ChatResponse {
+            message: Message {
+                role: Role::User,
+                content: self.response.clone().into(),
+            },
+            finish_reason: FinishReason::Stop,
+        }
+    }
 }
 
 #[derive(Copy, Clone, Debug, Serialize)]
@@ -87,6 +108,7 @@ enum Function {
     Chunk,
     SelectLanguage,
     Search,
+    Chat,
 }
 
 #[derive(Serialize)]
@@ -174,11 +196,15 @@ impl Csi for DevCsi {
     ) -> Vec<SearchResult> {
         self.csi_request(Function::Search, json!({"index_path": index, "query": query, "max_results": max_results, "min_score": min_score}))
     }
+
+    fn chat(&self, request: &ChatRequest<'_>) -> ChatResponse<'_> {
+        self.csi_request(Function::Chat, request)
+    }
 }
 
 #[cfg(test)]
 mod tests {
-    use pharia_skill::{ChunkParams, CompletionParams};
+    use pharia_skill::{ChatParams, ChunkParams, CompletionParams};
 
     use super::*;
 
@@ -276,5 +302,29 @@ What is the capital of France?<|eot_id|><|start_header_id|>assistant<|end_header
         );
 
         assert!(!response.is_empty());
+    }
+
+    #[test]
+    fn chat() {
+        drop(dotenvy::dotenv());
+
+        let token = std::env::var("AA_API_TOKEN").unwrap();
+        let csi = DevCsi::aleph_alpha(token);
+
+        let message = Message {
+            role: Role::User,
+            content: "Hello, how are you?".into(),
+        };
+        let response = csi.chat(&ChatRequest {
+            model: "llama-3.1-8b-instruct".into(),
+            messages: vec![message],
+            params: ChatParams {
+                max_tokens: None,
+                temperature: None,
+                top_p: None,
+            },
+        });
+
+        assert!(!response.message.content.is_empty());
     }
 }
