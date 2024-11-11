@@ -1,30 +1,22 @@
-use pharia_skill::{
-    prompt::llama3_instruct::Prompt, skill, CompletionParams, CompletionRequest, Csi,
-};
+use pharia_skill::{skill, ChatRequest, Csi, Message};
 
 // This can also return an `anyhow::Result<String>` if you need handle errors.
 #[skill]
 fn hello_world(csi: &impl Csi, name: &str) -> String {
-    let prompt = Prompt::new(
+    let system = Message::system(
         "Cutting Knowledge Date: December 2023
 Today Date: 23 Jul 2024
 
 You are a helpful assistant.",
-    )
-    .with_user_message(format!(
+    );
+
+    let user = Message::user(format!(
         "Provide a nice greeting for the person named: {name}"
     ));
+    let request = ChatRequest::new("llama-3.1-8b-instruct", system).and_message(user);
 
-    let result = csi.complete(&CompletionRequest::new(
-        "llama-3.1-8b-instruct",
-        prompt,
-        CompletionParams {
-            stop: &["<|start_header_id|>".into()],
-            ..Default::default()
-        },
-    ));
-
-    result.text
+    let result = csi.chat(&request);
+    result.message.content.to_string()
 }
 
 #[cfg(test)]

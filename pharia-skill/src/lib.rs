@@ -1,5 +1,3 @@
-pub mod prompt;
-
 use std::borrow::Cow;
 
 use serde::{Deserialize, Serialize};
@@ -60,7 +58,28 @@ pub struct Message<'a> {
     pub content: Cow<'a, str>,
 }
 
-#[derive(Clone, Debug, Serialize)]
+impl<'a> Message<'a> {
+    pub fn new(role: Role, content: impl Into<Cow<'a, str>>) -> Self {
+        Self {
+            role,
+            content: content.into(),
+        }
+    }
+
+    pub fn user(content: impl Into<Cow<'a, str>>) -> Self {
+        Self::new(Role::User, content)
+    }
+
+    pub fn assistant(content: impl Into<Cow<'a, str>>) -> Self {
+        Self::new(Role::Assistant, content)
+    }
+
+    pub fn system(content: impl Into<Cow<'a, str>>) -> Self {
+        Self::new(Role::System, content)
+    }
+}
+
+#[derive(Clone, Debug, Default, Serialize)]
 pub struct ChatParams {
     /// The maximum tokens that should be inferred.
     ///
@@ -75,9 +94,29 @@ pub struct ChatParams {
 
 #[derive(Clone, Debug, Serialize)]
 pub struct ChatRequest<'a> {
-    pub model: Cow<'a, str>,
-    pub messages: Vec<Message<'a>>,
-    pub params: ChatParams,
+    model: Cow<'a, str>,
+    messages: Vec<Message<'a>>,
+    params: ChatParams,
+}
+
+impl<'a> ChatRequest<'a> {
+    pub fn new(model: impl Into<Cow<'a, str>>, message: Message<'a>) -> Self {
+        Self {
+            model: model.into(),
+            messages: vec![message],
+            params: ChatParams::default(),
+        }
+    }
+
+    pub fn and_message(mut self, message: Message<'a>) -> Self {
+        self.messages.push(message);
+        self
+    }
+
+    pub fn with_params(mut self, params: ChatParams) -> Self {
+        self.params = params;
+        self
+    }
 }
 
 #[derive(Clone, Debug, Deserialize)]
