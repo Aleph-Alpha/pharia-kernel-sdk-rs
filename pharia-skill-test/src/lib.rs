@@ -37,10 +37,7 @@ impl Csi for StubCsi {
 
     fn chat(&self, _request: &ChatRequest<'_>) -> ChatResponse<'_> {
         ChatResponse {
-            message: Message {
-                role: Role::User,
-                content: "".into(),
-            },
+            message: Message::new(Role::User, ""),
             finish_reason: FinishReason::Stop,
         }
     }
@@ -91,10 +88,7 @@ impl Csi for MockCsi {
 
     fn chat(&self, _request: &ChatRequest<'_>) -> ChatResponse<'_> {
         ChatResponse {
-            message: Message {
-                role: Role::User,
-                content: self.response.clone().into(),
-            },
+            message: Message::new(Role::User, self.response.clone()),
             finish_reason: FinishReason::Stop,
         }
     }
@@ -204,7 +198,7 @@ impl Csi for DevCsi {
 
 #[cfg(test)]
 mod tests {
-    use pharia_skill::{ChatParams, ChunkParams, CompletionParams};
+    use pharia_skill::{ChunkParams, CompletionParams};
 
     use super::*;
 
@@ -311,19 +305,11 @@ What is the capital of France?<|eot_id|><|start_header_id|>assistant<|end_header
         let token = std::env::var("AA_API_TOKEN").unwrap();
         let csi = DevCsi::aleph_alpha(token);
 
-        let message = Message {
-            role: Role::User,
-            content: "Hello, how are you?".into(),
-        };
-        let response = csi.chat(&ChatRequest {
-            model: "llama-3.1-8b-instruct".into(),
-            messages: vec![message],
-            params: ChatParams {
-                max_tokens: None,
-                temperature: None,
-                top_p: None,
-            },
-        });
+        let request = ChatRequest::new(
+            "llama-3.1-8b-instruct",
+            Message::user("Hello, how are you?"),
+        );
+        let response = csi.chat(&request);
 
         assert!(!response.message.content.is_empty());
     }
