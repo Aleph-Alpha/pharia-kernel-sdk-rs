@@ -32,6 +32,62 @@ pub trait Csi {
     /// text: Text input
     /// languages: All languages that should be considered during detection.
     fn select_language(&self, text: &str, languages: &[Language]) -> Option<Language>;
+
+    /// Search for documents in a given index.
+    fn search(
+        &self,
+        index: &IndexPath<'_>,
+        query: &str,
+        max_results: u32,
+        min_score: Option<f64>,
+    ) -> Vec<SearchResult>;
+}
+
+/// Which documents you want to search in, and which type of index should be used
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct IndexPath<'a> {
+    /// The namespace the collection belongs to
+    pub namespace: Cow<'a, str>,
+    /// The collection you want to search in
+    pub collection: Cow<'a, str>,
+    /// The search index you want to use for the collection
+    pub index: Cow<'a, str>,
+}
+
+impl<'a> IndexPath<'a> {
+    pub fn new(
+        namespace: impl Into<Cow<'a, str>>,
+        collection: impl Into<Cow<'a, str>>,
+        index: impl Into<Cow<'a, str>>,
+    ) -> Self {
+        Self {
+            namespace: namespace.into(),
+            collection: collection.into(),
+            index: index.into(),
+        }
+    }
+}
+
+/// Location of a document in the search engine
+#[derive(Clone, Debug, Deserialize)]
+pub struct DocumentPath {
+    /// The namespace the collection belongs to
+    pub namespace: String,
+    /// The collection you want to search in
+    pub collection: String,
+    /// The name of the document
+    pub name: String,
+}
+
+/// Result to a search query
+#[derive(Clone, Debug, Deserialize)]
+pub struct SearchResult {
+    /// The path to the document that was found
+    pub document_path: DocumentPath,
+    /// The content of the document that was found
+    pub content: String,
+    /// How relevant the document is to the search query
+    pub score: f64,
 }
 
 /// The reason that the model stopped completing text
@@ -143,7 +199,8 @@ pub mod bindings {
     use serde::Serialize;
 
     use crate::{
-        ChunkParams, Completion, CompletionParams, CompletionRequest, FinishReason, Language,
+        ChunkParams, Completion, CompletionParams, CompletionRequest, DocumentPath, FinishReason,
+        IndexPath, Language, SearchResult,
     };
 
     wit_bindgen::generate!({
@@ -257,6 +314,41 @@ pub mod bindings {
         }
     }
 
+    impl From<pharia::skill::csi::DocumentPath> for DocumentPath {
+        fn from(value: pharia::skill::csi::DocumentPath) -> Self {
+            Self {
+                namespace: value.namespace,
+                collection: value.collection,
+                name: value.name,
+            }
+        }
+    }
+
+    impl From<pharia::skill::csi::SearchResult> for SearchResult {
+        fn from(value: pharia::skill::csi::SearchResult) -> Self {
+            let pharia::skill::csi::SearchResult {
+                document_path,
+                content,
+                score,
+            } = value;
+            Self {
+                document_path: document_path.into(),
+                content,
+                score,
+            }
+        }
+    }
+
+    impl<'a> From<&IndexPath<'a>> for pharia::skill::csi::IndexPath {
+        fn from(value: &IndexPath<'a>) -> Self {
+            Self {
+                namespace: value.namespace.clone().into_owned(),
+                collection: value.collection.clone().into_owned(),
+                index: value.index.clone().into_owned(),
+            }
+        }
+    }
+
     /// CSI implementation for the WASI environment.
     pub struct WasiCsi;
 
@@ -283,6 +375,19 @@ pub mod bindings {
                 &languages.iter().map(|&l| l.into()).collect::<Vec<_>>(),
             )
             .map(Into::into)
+        }
+
+        fn search(
+            &self,
+            index: &IndexPath<'_>,
+            query: &str,
+            max_results: u32,
+            min_score: Option<f64>,
+        ) -> Vec<SearchResult> {
+            pharia::skill::csi::search(&index.into(), query, max_results, min_score)
+                .into_iter()
+                .map(Into::into)
+                .collect()
         }
     }
 

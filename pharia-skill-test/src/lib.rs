@@ -1,6 +1,8 @@
 use std::time::Duration;
 
-use pharia_skill::{Completion, CompletionRequest, Csi, FinishReason, Language};
+use pharia_skill::{
+    Completion, CompletionRequest, Csi, FinishReason, IndexPath, Language, SearchResult,
+};
 use serde::{de::DeserializeOwned, Serialize};
 use ureq::{json, Agent, AgentBuilder};
 
@@ -20,6 +22,16 @@ impl Csi for StubCsi {
 
     fn select_language(&self, _text: &str, _languages: &[Language]) -> Option<Language> {
         None
+    }
+
+    fn search(
+        &self,
+        _index: &IndexPath<'_>,
+        _query: &str,
+        _max_results: u32,
+        _min_score: Option<f64>,
+    ) -> Vec<SearchResult> {
+        vec![]
     }
 }
 
@@ -55,6 +67,16 @@ impl Csi for MockCsi {
     ) -> Option<pharia_skill::Language> {
         None
     }
+
+    fn search(
+        &self,
+        _index: &IndexPath<'_>,
+        _query: &str,
+        _max_results: u32,
+        _min_score: Option<f64>,
+    ) -> Vec<SearchResult> {
+        vec![]
+    }
 }
 
 #[derive(Copy, Clone, Debug, Serialize)]
@@ -64,6 +86,7 @@ enum Function {
     CompleteAll,
     Chunk,
     SelectLanguage,
+    Search,
 }
 
 #[derive(Serialize)]
@@ -140,6 +163,16 @@ impl Csi for DevCsi {
             Function::SelectLanguage,
             json!({"text": text, "languages": languages}),
         )
+    }
+
+    fn search(
+        &self,
+        index: &IndexPath<'_>,
+        query: &str,
+        max_results: u32,
+        min_score: Option<f64>,
+    ) -> Vec<SearchResult> {
+        self.csi_request(Function::Search, json!({"index_path": index, "query": query, "max_results": max_results, "min_score": min_score}))
     }
 }
 
@@ -226,5 +259,22 @@ What is the capital of France?<|eot_id|><|start_header_id|>assistant<|end_header
         let response = csi.select_language("A rising tide lifts all boats", &Language::all());
 
         assert_eq!(response, Some(Language::Eng));
+    }
+
+    #[test]
+    fn search() {
+        drop(dotenvy::dotenv());
+
+        let token = std::env::var("AA_API_TOKEN").unwrap();
+        let csi = DevCsi::aleph_alpha(token);
+
+        let response = csi.search(
+            &IndexPath::new("aleph-alpha", "pharia-kernel-demo-collection", "asym-256"),
+            "decoder",
+            10,
+            None,
+        );
+
+        assert!(!response.is_empty());
     }
 }
