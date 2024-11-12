@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0](https://github.com/Aleph-Alpha/pharia-kernel-sdk-rs/compare/pharia-skill-v0.2.1...pharia-skill-v0.3.0)
+
+### Features
+
+- [**breaking**] Chat endpoint replaces prompt helpers - ([aac91b6](https://github.com/Aleph-Alpha/pharia-kernel-sdk-rs/commit/aac91b6fb152bbd647b8f0bd0dabeef6bbb06c13))
+- Add chat to sdk - ([34cadca](https://github.com/Aleph-Alpha/pharia-kernel-sdk-rs/commit/34cadca8af4b0ec4a743d98d722c05ffe120512a))
+
+
 ## [0.2.1](https://github.com/Aleph-Alpha/pharia-kernel-sdk-rs/compare/pharia-skill-v0.2.0...pharia-skill-v0.2.1)
 
 ### Features
