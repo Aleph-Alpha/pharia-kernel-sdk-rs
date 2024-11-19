@@ -108,11 +108,13 @@ impl<'a> ChatRequest<'a> {
         }
     }
 
+    #[must_use]
     pub fn and_message(mut self, message: Message<'a>) -> Self {
         self.messages.push(message);
         self
     }
 
+    #[must_use]
     pub fn with_params(mut self, params: ChatParams) -> Self {
         self.params = params;
         self
@@ -434,7 +436,7 @@ pub mod bindings {
         }
     }
 
-    impl<'a> From<&Role> for pharia::skill::csi::Role {
+    impl From<&Role> for pharia::skill::csi::Role {
         fn from(value: &Role) -> Self {
             match value {
                 Role::User => Self::User,
@@ -444,7 +446,7 @@ pub mod bindings {
         }
     }
 
-    impl<'a> From<pharia::skill::csi::Role> for Role {
+    impl From<pharia::skill::csi::Role> for Role {
         fn from(value: pharia::skill::csi::Role) -> Self {
             match value {
                 pharia::skill::csi::Role::User => Self::User,
@@ -481,7 +483,7 @@ pub mod bindings {
         }
     }
 
-    impl<'a> From<&ChatParams> for pharia::skill::csi::ChatParams {
+    impl From<&ChatParams> for pharia::skill::csi::ChatParams {
         fn from(value: &ChatParams) -> Self {
             let ChatParams {
                 max_tokens,
