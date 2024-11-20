@@ -7,6 +7,8 @@ pub use bindings::exports::pharia::skill::skill_handler::Error;
 /// Macro to define a Skill. It wraps a function that takes a single argument and returns a single value.
 pub use pharia_skill_macros::skill;
 
+mod chat;
+
 /// Cognitive System Interface
 pub trait Csi {
     /// Generate a completion for a given prompt using a specific model.
