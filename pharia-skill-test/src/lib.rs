@@ -138,7 +138,7 @@ impl DevCsi {
 
     /// Construct a new [`DevCsi`] that points to the Aleph Alpha hosted Kernel
     pub fn aleph_alpha(token: impl Into<String>) -> Self {
-        Self::new("https://pharia-kernel.aleph-alpha.stackit.run", token)
+        Self::new("https://pharia-kernel.product.pharia.com", token)
     }
 
     fn csi_request<R: DeserializeOwned>(&self, function: Function, payload: impl Serialize) -> R {
@@ -289,7 +289,7 @@ What is the capital of France?<|eot_id|><|start_header_id|>assistant<|end_header
         let csi = DevCsi::aleph_alpha(token);
 
         let response = csi.search(
-            &IndexPath::new("aleph-alpha", "pharia-kernel-demo-collection", "asym-256"),
+            &IndexPath::new("Kernel", "test", "asym-64"),
             "decoder",
             10,
             None,
