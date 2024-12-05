@@ -138,7 +138,7 @@ checksum = "2304e00983f87ffb38b55b444b5e3b60a884b5d30c0fca7d82fe33449bbe55ea"
 
 [[package]]
 name = "hello-world"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "anyhow",
  "pharia-skill",
@@ -361,7 +361,7 @@ checksum = "e3148f5046208a5d56bcfc03053e3ca6334e51da8dfb19b6cdc8b306fae3283e"
 
 [[package]]
 name = "pharia-skill"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "anyhow",
  "pharia-skill-macros",
@@ -373,7 +373,7 @@ dependencies = [
 
 [[package]]
 name = "pharia-skill-macros"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "quote",
  "syn",
@@ -381,7 +381,7 @@ dependencies = [
 
 [[package]]
 name = "pharia-skill-test"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "anyhow",
  "dotenvy",
