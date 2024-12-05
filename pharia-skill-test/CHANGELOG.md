@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0](https://github.com/Aleph-Alpha/pharia-kernel-sdk-rs/compare/pharia-skill-test-v0.3.0...pharia-skill-test-v0.4.0)
+
+### Features
+
+- [**breaking**] Rename env variable to PHARIA_AI_TOKEN - ([b230215](https://github.com/Aleph-Alpha/pharia-kernel-sdk-rs/commit/b230215919107fadd2274ce1a5a571a7faa3809b))
+
+
 ## [0.3.0](https://github.com/Aleph-Alpha/pharia-kernel-sdk-rs/compare/pharia-skill-test-v0.2.1...pharia-skill-test-v0.3.0)
 
 ### Features
