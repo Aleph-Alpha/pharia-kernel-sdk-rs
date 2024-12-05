@@ -25,7 +25,7 @@ jobs:
       - name: Run cargo test
         run: cargo test --workspace --all-features
     env:
-      AA_API_TOKEN: ${{ secrets.AA_API_TOKEN }}
+      PHARIA_AI_TOKEN: ${{ secrets.PHARIA_AI_TOKEN }}
 
   lints:
     runs-on: ubuntu-latest

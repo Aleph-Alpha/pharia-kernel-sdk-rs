@@ -206,7 +206,7 @@ mod tests {
     fn can_make_request() {
         drop(dotenvy::dotenv());
 
-        let token = std::env::var("AA_API_TOKEN").unwrap();
+        let token = std::env::var("PHARIA_AI_TOKEN").unwrap();
         let csi = DevCsi::aleph_alpha(token);
 
         let response = csi.complete(&CompletionRequest::new(
@@ -231,7 +231,7 @@ What is the capital of France?<|eot_id|><|start_header_id|>assistant<|end_header
     fn can_make_multiple_requests() {
         drop(dotenvy::dotenv());
 
-        let token = std::env::var("AA_API_TOKEN").unwrap();
+        let token = std::env::var("PHARIA_AI_TOKEN").unwrap();
         let csi = DevCsi::aleph_alpha(token);
 
         let params = CompletionParams {
@@ -261,7 +261,7 @@ What is the capital of France?<|eot_id|><|start_header_id|>assistant<|end_header
     fn chunk() {
         drop(dotenvy::dotenv());
 
-        let token = std::env::var("AA_API_TOKEN").unwrap();
+        let token = std::env::var("PHARIA_AI_TOKEN").unwrap();
         let csi = DevCsi::aleph_alpha(token);
 
         let response = csi.chunk("123456", &ChunkParams::new("llama-3.1-8b-instruct", 1));
@@ -273,7 +273,7 @@ What is the capital of France?<|eot_id|><|start_header_id|>assistant<|end_header
     fn select_language() {
         drop(dotenvy::dotenv());
 
-        let token = std::env::var("AA_API_TOKEN").unwrap();
+        let token = std::env::var("PHARIA_AI_TOKEN").unwrap();
         let csi = DevCsi::aleph_alpha(token);
 
         let response = csi.select_language("A rising tide lifts all boats", &Language::all());
@@ -285,7 +285,7 @@ What is the capital of France?<|eot_id|><|start_header_id|>assistant<|end_header
     fn search() {
         drop(dotenvy::dotenv());
 
-        let token = std::env::var("AA_API_TOKEN").unwrap();
+        let token = std::env::var("PHARIA_AI_TOKEN").unwrap();
         let csi = DevCsi::aleph_alpha(token);
 
         let response = csi.search(
@@ -302,7 +302,7 @@ What is the capital of France?<|eot_id|><|start_header_id|>assistant<|end_header
     fn chat() {
         drop(dotenvy::dotenv());
 
-        let token = std::env::var("AA_API_TOKEN").unwrap();
+        let token = std::env::var("PHARIA_AI_TOKEN").unwrap();
         let csi = DevCsi::aleph_alpha(token);
 
         let request = ChatRequest::new(
