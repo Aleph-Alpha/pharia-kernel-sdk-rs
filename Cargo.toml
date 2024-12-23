@@ -28,13 +28,13 @@ pharia-skill = { path = "./pharia-skill", registry = "jfrog", version = "0.4.0" 
 pharia-skill-macros = { path = "./pharia-skill-macros", registry = "jfrog", version = "0.4.0" }
 pharia-skill-test = { path = "./pharia-skill-test", registry = "jfrog", version = "0.4.0" }
 
-anyhow = "^1.0.94"
+anyhow = "^1.0.95"
 dotenvy = "0.15"
 quote = "^1.0.35"
 serde = { version = "^1.0.216", features = ["derive"] }
-serde_json = "^1.0.133"
+serde_json = "^1.0.134"
 strum = { version = "0.26", features = ["derive"] }
-syn = { version = "^2.0.90", features = ["full"] }
+syn = { version = "^2.0.91", features = ["full"] }
 ureq = { version = "^2.12", features = ["json"] }
 wit-bindgen = "0.35"
 
