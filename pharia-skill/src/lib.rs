@@ -465,7 +465,7 @@ pub mod bindings {
         }
     }
 
-    impl<'a> From<pharia::skill::csi::Message> for Message<'a> {
+    impl From<pharia::skill::csi::Message> for Message<'_> {
         fn from(value: pharia::skill::csi::Message) -> Self {
             Self {
                 role: value.role.into(),
@@ -474,7 +474,7 @@ pub mod bindings {
         }
     }
 
-    impl<'a> From<pharia::skill::csi::ChatResponse> for ChatResponse<'a> {
+    impl From<pharia::skill::csi::ChatResponse> for ChatResponse<'_> {
         fn from(value: pharia::skill::csi::ChatResponse) -> Self {
             Self {
                 message: value.message.into(),

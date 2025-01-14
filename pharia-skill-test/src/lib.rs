@@ -5,7 +5,7 @@ use pharia_skill::{
     Language, Message, Role, SearchResult,
 };
 use serde::{de::DeserializeOwned, Serialize};
-use ureq::{json, Agent, AgentBuilder};
+use ureq::{json, serde_json::Value, Agent, AgentBuilder};
 
 pub struct StubCsi;
 
@@ -147,13 +147,24 @@ impl DevCsi {
             function,
             payload,
         };
-        self.agent
+        let response = self
+            .agent
             .post(&format!("{}/csi", &self.address))
             .set("Authorization", &format!("Bearer {}", self.token))
-            .send_json(json)
-            .unwrap()
-            .into_json::<R>()
-            .unwrap()
+            .send_json(json);
+
+        match response {
+            Ok(response) => response.into_json::<R>().unwrap(),
+            Err(ureq::Error::Status(status, response)) => {
+                panic!(
+                    "Failed Request: Status {status} {}",
+                    response.into_json::<Value>().unwrap()
+                );
+            }
+            Err(e) => {
+                panic!("{e}")
+            }
+        }
     }
 }
 
