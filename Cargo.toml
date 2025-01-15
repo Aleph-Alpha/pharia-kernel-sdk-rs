@@ -36,7 +36,7 @@ serde_json = "^1.0.135"
 strum = { version = "0.26", features = ["derive"] }
 syn = { version = "^2.0.96", features = ["full"] }
 ureq = { version = "^2.12", features = ["json"] }
-wit-bindgen = "0.35"
+wit-bindgen = "0.37"
 
 [workspace.lints.rust]
 future-incompatible = "warn"
