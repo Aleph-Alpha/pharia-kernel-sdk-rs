@@ -2,7 +2,7 @@
 name = "pharia-skill-macros"
 description = "Procedural macros for use within the `pharia-skill` crate."
 version.workspace = true
-rust-version = "1.76.0"
+rust-version = "1.82.0"
 authors.workspace = true
 edition.workspace = true
 keywords.workspace = true

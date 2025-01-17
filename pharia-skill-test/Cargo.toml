@@ -2,7 +2,7 @@
 name = "pharia-skill-test"
 description = "Test helpers for testing Pharia Kernel skill components locally."
 version.workspace = true
-rust-version = "1.76.0"
+rust-version = "1.82.0"
 authors.workspace = true
 edition.workspace = true
 repository.workspace = true
