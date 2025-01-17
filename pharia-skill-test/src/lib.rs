@@ -247,6 +247,7 @@ What is the capital of France?<|eot_id|><|start_header_id|>assistant<|end_header
 
         let params = CompletionParams {
             stop: &["<|start_header_id|>".into()],
+            max_tokens: Some(100),
             ..Default::default()
         };
         let completion_request = CompletionRequest::new(
