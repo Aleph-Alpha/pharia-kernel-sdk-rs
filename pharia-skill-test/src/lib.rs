@@ -209,7 +209,7 @@ impl Csi for DevCsi {
 
 #[cfg(test)]
 mod tests {
-    use pharia_skill::{ChunkParams, CompletionParams};
+    use pharia_skill::{ChatParams, ChunkParams, CompletionParams};
 
     use super::*;
 
@@ -232,6 +232,7 @@ You are a helpful assistant<|eot_id|><|start_header_id|>user<|end_header_id|>
 What is the capital of France?<|eot_id|><|start_header_id|>assistant<|end_header_id|>",
             CompletionParams {
                 stop: &["<|start_header_id|>".into()],
+                max_tokens: Some(10),
                 ..Default::default()
             },
         ));
@@ -247,7 +248,7 @@ What is the capital of France?<|eot_id|><|start_header_id|>assistant<|end_header
 
         let params = CompletionParams {
             stop: &["<|start_header_id|>".into()],
-            max_tokens: Some(100),
+            max_tokens: Some(10),
             ..Default::default()
         };
         let completion_request = CompletionRequest::new(
@@ -320,7 +321,11 @@ What is the capital of France?<|eot_id|><|start_header_id|>assistant<|end_header
         let request = ChatRequest::new(
             "llama-3.1-8b-instruct",
             Message::user("Hello, how are you?"),
-        );
+        )
+        .with_params(ChatParams {
+            max_tokens: Some(1),
+            ..Default::default()
+        });
         let response = csi.chat(&request);
 
         assert!(!response.message.content.is_empty());
