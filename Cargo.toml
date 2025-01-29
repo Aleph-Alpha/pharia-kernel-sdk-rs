@@ -32,7 +32,7 @@ anyhow = "^1.0.95"
 dotenvy = "0.15"
 quote = "^1.0.38"
 serde = { version = "^1.0.217", features = ["derive"] }
-serde_json = "^1.0.137"
+serde_json = "^1.0.138"
 strum = { version = "0.26", features = ["derive"] }
 syn = { version = "^2.0.96", features = ["full"] }
 ureq = { version = "^2.12", features = ["json"] }
