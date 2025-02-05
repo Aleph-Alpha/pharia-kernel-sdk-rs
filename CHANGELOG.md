@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.2](https://github.com/Aleph-Alpha/pharia-kernel-sdk-rs/compare/pharia-skill-v0.4.1...pharia-skill-v0.4.2)
+
+### Fixes
+
+- Deserialization of chat messages - ([85e374a](https://github.com/Aleph-Alpha/pharia-kernel-sdk-rs/commit/85e374a478586ef9cd4c7bb75cf92e9d38127893))
+
+
 ## [0.4.1](https://github.com/Aleph-Alpha/pharia-kernel-sdk-rs/compare/pharia-skill-v0.4.0...pharia-skill-v0.4.1)
 
 ### Builds
