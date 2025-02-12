@@ -15,10 +15,12 @@ crate-type = ["cdylib"]
 [dependencies]
 anyhow.workspace = true
 pharia-skill.workspace = true
+schemars.workspace = true
 serde.workspace = true
 
 [dev-dependencies]
 pharia-skill-test.workspace = true
+serde_json.workspace = true
 
 [lints]
 workspace = true

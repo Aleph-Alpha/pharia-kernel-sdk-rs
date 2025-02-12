@@ -50,6 +50,8 @@ crate-type = ["cdylib"]
 anyhow = "1"
 # The Skill SDK for building Kernel Skills
 pharia-skill = { version = "0.2.0", registry = "jfrog" }
+# Used for autogenerating an OpenAPI spec for your skill.
+schemars = "0.8"
 # For deriving custom input and output structs
 serde = { version = "1", features = ["derive"] }
 

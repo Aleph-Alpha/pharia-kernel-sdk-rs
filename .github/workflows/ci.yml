@@ -68,3 +68,15 @@ jobs:
 
       - run: cargo generate-lockfile -Z direct-minimal-versions
       - run: cargo check --workspace
+
+  build-example:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
+          targets: wasm32-wasip2
+      - uses: Swatinem/rust-cache@v2
+
+      - run: cargo build -p hello-world --release --target wasm32-wasip2

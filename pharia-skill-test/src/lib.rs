@@ -1,45 +1,77 @@
-use std::time::Duration;
+use std::{borrow::Cow, time::Duration};
 
 use pharia_skill::{
-    ChatRequest, ChatResponse, Completion, CompletionRequest, Csi, FinishReason, IndexPath,
-    Language, Message, Role, SearchResult,
+    ChatRequest, ChatResponse, ChunkRequest, Completion, CompletionRequest, Csi, Document,
+    DocumentPath, FinishReason, LanguageCode, Message, SearchRequest, SearchResult,
+    SelectLanguageRequest, TokenUsage,
 };
-use serde::{de::DeserializeOwned, Serialize};
+use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use ureq::{json, serde_json::Value, Agent, AgentBuilder};
 
 pub struct StubCsi;
 
 impl Csi for StubCsi {
-    fn complete(&self, request: &CompletionRequest<'_>) -> Completion {
-        Completion {
-            text: request.prompt.clone().into_owned(),
-            finish_reason: FinishReason::Stop,
-        }
+    fn chat_concurrently(&self, requests: Vec<ChatRequest<'_>>) -> Vec<ChatResponse<'_>> {
+        requests
+            .iter()
+            .map(|_| ChatResponse {
+                message: Message::new("user", ""),
+                finish_reason: FinishReason::Stop,
+            })
+            .collect()
     }
 
-    fn chunk(&self, text: &str, _params: &pharia_skill::ChunkParams<'_>) -> Vec<String> {
-        vec![text.to_owned()]
+    fn complete_concurrently(&self, requests: Vec<CompletionRequest<'_>>) -> Vec<Completion<'_>> {
+        requests
+            .into_iter()
+            .map(|request| Completion {
+                text: request.prompt.into_owned().into(),
+                finish_reason: FinishReason::Stop,
+                logprobs: Cow::Borrowed(&[]),
+                usage: TokenUsage {
+                    prompt: 0,
+                    completion: 0,
+                },
+            })
+            .collect()
     }
 
-    fn select_language(&self, _text: &str, _languages: &[Language]) -> Option<Language> {
-        None
+    fn chunk_concurrently(&self, requests: Vec<ChunkRequest<'_>>) -> Vec<Vec<String>> {
+        requests
+            .into_iter()
+            .map(|request| vec![request.text.into_owned()])
+            .collect()
     }
 
-    fn search(
+    fn select_language_concurrently(
         &self,
-        _index: &IndexPath<'_>,
-        _query: &str,
-        _max_results: u32,
-        _min_score: Option<f64>,
-    ) -> Vec<SearchResult> {
+        requests: Vec<SelectLanguageRequest<'_>>,
+    ) -> Vec<Option<LanguageCode>> {
+        requests.iter().map(|_| None).collect()
+    }
+
+    fn search_concurrently(&self, _requests: Vec<SearchRequest<'_>>) -> Vec<Vec<SearchResult<'_>>> {
         vec![]
     }
 
-    fn chat(&self, _request: &ChatRequest<'_>) -> ChatResponse<'_> {
-        ChatResponse {
-            message: Message::new(Role::User, ""),
-            finish_reason: FinishReason::Stop,
-        }
+    fn documents<Metadata>(
+        &self,
+        _paths: Vec<DocumentPath<'_>>,
+    ) -> anyhow::Result<Vec<Document<'_, Metadata>>>
+    where
+        Metadata: for<'a> Deserialize<'a>,
+    {
+        Ok(vec![])
+    }
+
+    fn documents_metadata<Metadata>(
+        &self,
+        _paths: Vec<DocumentPath<'_>>,
+    ) -> anyhow::Result<Vec<Option<Metadata>>>
+    where
+        Metadata: for<'a> Deserialize<'a>,
+    {
+        Ok(vec![])
     }
 }
 
@@ -57,40 +89,67 @@ impl MockCsi {
 }
 
 impl Csi for MockCsi {
-    fn complete(&self, _request: &CompletionRequest<'_>) -> Completion {
-        Completion {
-            text: self.response.clone(),
-            finish_reason: FinishReason::Stop,
-        }
+    fn chat_concurrently(&self, requests: Vec<ChatRequest<'_>>) -> Vec<ChatResponse<'_>> {
+        requests
+            .iter()
+            .map(|_| ChatResponse {
+                message: Message::new("user", self.response.clone()),
+                finish_reason: FinishReason::Stop,
+            })
+            .collect()
     }
 
-    fn chunk(&self, text: &str, _params: &pharia_skill::ChunkParams<'_>) -> Vec<String> {
-        vec![text.to_owned()]
+    fn complete_concurrently(&self, requests: Vec<CompletionRequest<'_>>) -> Vec<Completion<'_>> {
+        requests
+            .iter()
+            .map(|_| Completion {
+                text: Cow::Borrowed(&self.response),
+                finish_reason: FinishReason::Stop,
+                logprobs: Cow::Borrowed(&[]),
+                usage: TokenUsage {
+                    prompt: 0,
+                    completion: 0,
+                },
+            })
+            .collect()
     }
 
-    fn select_language(
+    fn chunk_concurrently(&self, requests: Vec<ChunkRequest<'_>>) -> Vec<Vec<String>> {
+        requests
+            .into_iter()
+            .map(|request| vec![request.text.into_owned()])
+            .collect()
+    }
+
+    fn select_language_concurrently(
         &self,
-        _text: &str,
-        _languages: &[pharia_skill::Language],
-    ) -> Option<pharia_skill::Language> {
-        None
+        requests: Vec<SelectLanguageRequest<'_>>,
+    ) -> Vec<Option<LanguageCode>> {
+        requests.iter().map(|_| None).collect()
     }
 
-    fn search(
-        &self,
-        _index: &IndexPath<'_>,
-        _query: &str,
-        _max_results: u32,
-        _min_score: Option<f64>,
-    ) -> Vec<SearchResult> {
+    fn search_concurrently(&self, _requests: Vec<SearchRequest<'_>>) -> Vec<Vec<SearchResult<'_>>> {
         vec![]
     }
 
-    fn chat(&self, _request: &ChatRequest<'_>) -> ChatResponse<'_> {
-        ChatResponse {
-            message: Message::new(Role::User, self.response.clone()),
-            finish_reason: FinishReason::Stop,
-        }
+    fn documents<Metadata>(
+        &self,
+        _paths: Vec<DocumentPath<'_>>,
+    ) -> anyhow::Result<Vec<Document<'_, Metadata>>>
+    where
+        Metadata: for<'a> Deserialize<'a>,
+    {
+        Ok(vec![])
+    }
+
+    fn documents_metadata<Metadata>(
+        &self,
+        _paths: Vec<DocumentPath<'_>>,
+    ) -> anyhow::Result<Vec<Option<Metadata>>>
+    where
+        Metadata: for<'a> Deserialize<'a>,
+    {
+        Ok(vec![])
     }
 }
 
@@ -98,11 +157,12 @@ impl Csi for MockCsi {
 #[serde(rename_all = "snake_case")]
 enum Function {
     Complete,
-    CompleteAll,
     Chunk,
     SelectLanguage,
     Search,
     Chat,
+    Documents,
+    DocumentMetadata,
 }
 
 #[derive(Serialize)]
@@ -122,7 +182,7 @@ pub struct DevCsi {
 
 impl DevCsi {
     /// The version of the API we are calling against
-    const VERSION: &str = "0.2";
+    const VERSION: &str = "0.3";
 
     #[must_use]
     pub fn new(address: impl Into<String>, token: impl Into<String>) -> Self {
@@ -141,7 +201,11 @@ impl DevCsi {
         Self::new("https://pharia-kernel.product.pharia.com", token)
     }
 
-    fn csi_request<R: DeserializeOwned>(&self, function: Function, payload: impl Serialize) -> R {
+    fn csi_request<R: DeserializeOwned>(
+        &self,
+        function: Function,
+        payload: impl Serialize,
+    ) -> anyhow::Result<R> {
         let json = CsiRequest {
             version: Self::VERSION,
             function,
@@ -154,11 +218,11 @@ impl DevCsi {
             .send_json(json);
 
         match response {
-            Ok(response) => response.into_json::<R>().unwrap(),
+            Ok(response) => Ok(response.into_json::<R>()?),
             Err(ureq::Error::Status(status, response)) => {
                 panic!(
                     "Failed Request: Status {status} {}",
-                    response.into_json::<Value>().unwrap()
+                    response.into_json::<Value>().unwrap_or_default()
                 );
             }
             Err(e) => {
@@ -169,47 +233,73 @@ impl DevCsi {
 }
 
 impl Csi for DevCsi {
-    fn complete(&self, request: &CompletionRequest<'_>) -> Completion {
-        self.csi_request(Function::Complete, request)
+    fn chat_concurrently(&self, requests: Vec<ChatRequest<'_>>) -> Vec<ChatResponse<'_>> {
+        self.csi_request(Function::Chat, json!({"requests": requests}))
+            .unwrap()
     }
 
-    fn complete_all(&self, requests: &[CompletionRequest<'_>]) -> Vec<Completion> {
-        self.csi_request(Function::CompleteAll, json!({"requests": requests}))
+    fn complete_concurrently(&self, requests: Vec<CompletionRequest<'_>>) -> Vec<Completion<'_>> {
+        self.csi_request(Function::Complete, json!({"requests": requests}))
+            .unwrap()
     }
 
-    fn chunk(&self, text: &str, params: &pharia_skill::ChunkParams<'_>) -> Vec<String> {
-        self.csi_request(Function::Chunk, json!({"text": text, "params": params}))
+    fn chunk_concurrently(&self, requests: Vec<ChunkRequest<'_>>) -> Vec<Vec<String>> {
+        self.csi_request(Function::Chunk, json!({"requests": requests}))
+            .unwrap()
     }
 
-    fn select_language(
+    fn select_language_concurrently(
         &self,
-        text: &str,
-        languages: &[pharia_skill::Language],
-    ) -> Option<pharia_skill::Language> {
-        self.csi_request(
-            Function::SelectLanguage,
-            json!({"text": text, "languages": languages}),
-        )
+        requests: Vec<SelectLanguageRequest<'_>>,
+    ) -> Vec<Option<LanguageCode>> {
+        self.csi_request(Function::SelectLanguage, json!({"requests": requests}))
+            .unwrap()
     }
 
-    fn search(
+    fn search_concurrently(&self, requests: Vec<SearchRequest<'_>>) -> Vec<Vec<SearchResult<'_>>> {
+        self.csi_request(Function::Search, json!({"requests": requests}))
+            .unwrap()
+    }
+
+    fn documents<Metadata>(
         &self,
-        index: &IndexPath<'_>,
-        query: &str,
-        max_results: u32,
-        min_score: Option<f64>,
-    ) -> Vec<SearchResult> {
-        self.csi_request(Function::Search, json!({"index_path": index, "query": query, "max_results": max_results, "min_score": min_score}))
+        paths: Vec<DocumentPath<'_>>,
+    ) -> anyhow::Result<Vec<Document<'_, Metadata>>>
+    where
+        Metadata: for<'a> Deserialize<'a> + Serialize,
+    {
+        Ok(self
+            .csi_request::<Vec<Document<'_, Metadata>>>(
+                Function::Documents,
+                json!({"requests": paths}),
+            )?
+            .into_iter()
+            .collect())
     }
 
-    fn chat(&self, request: &ChatRequest<'_>) -> ChatResponse<'_> {
-        self.csi_request(Function::Chat, request)
+    fn documents_metadata<Metadata>(
+        &self,
+        paths: Vec<DocumentPath<'_>>,
+    ) -> anyhow::Result<Vec<Option<Metadata>>>
+    where
+        Metadata: for<'a> Deserialize<'a> + Serialize,
+    {
+        Ok(self
+            .csi_request::<Vec<Option<Metadata>>>(
+                Function::DocumentMetadata,
+                json!({"requests": paths}),
+            )?
+            .into_iter()
+            .collect())
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use pharia_skill::{ChatParams, ChunkParams, CompletionParams};
+    use jiff::Timestamp;
+    use pharia_skill::{
+        ChatParams, ChunkParams, ChunkRequest, CompletionParams, IndexPath, Modality,
+    };
 
     use super::*;
 
@@ -220,9 +310,10 @@ mod tests {
         let token = std::env::var("PHARIA_AI_TOKEN").unwrap();
         let csi = DevCsi::aleph_alpha(token);
 
-        let response = csi.complete(&CompletionRequest::new(
-            "llama-3.1-8b-instruct",
-            "<|begin_of_text|><|start_header_id|>system<|end_header_id|>
+        let response = csi.complete(
+            CompletionRequest::new(
+                "llama-3.1-8b-instruct",
+                "<|begin_of_text|><|start_header_id|>system<|end_header_id|>
 
 Cutting Knowledge Date: December 2023
 Today Date: 23 Jul 2024
@@ -230,13 +321,17 @@ Today Date: 23 Jul 2024
 You are a helpful assistant<|eot_id|><|start_header_id|>user<|end_header_id|>
 
 What is the capital of France?<|eot_id|><|start_header_id|>assistant<|end_header_id|>",
-            CompletionParams {
-                stop: &["<|start_header_id|>".into()],
+            )
+            .with_params(CompletionParams {
+                stop: vec!["<|start_header_id|>".into()].into(),
                 max_tokens: Some(10),
                 ..Default::default()
-            },
-        ));
-        assert_eq!(response.text.trim(), "The capital of France is Paris.");
+            }),
+        );
+        assert_eq!(
+            response.text.trim(),
+            "The capital of France is Paris.<|eot_id|>"
+        );
     }
 
     #[test]
@@ -247,7 +342,7 @@ What is the capital of France?<|eot_id|><|start_header_id|>assistant<|end_header
         let csi = DevCsi::aleph_alpha(token);
 
         let params = CompletionParams {
-            stop: &["<|start_header_id|>".into()],
+            stop: vec!["<|start_header_id|>".into()].into(),
             max_tokens: Some(10),
             ..Default::default()
         };
@@ -261,13 +356,13 @@ Today Date: 23 Jul 2024
 You are a helpful assistant<|eot_id|><|start_header_id|>user<|end_header_id|>
 
 What is the capital of France?<|eot_id|><|start_header_id|>assistant<|end_header_id|>",
-            params,
-        );
+        )
+        .with_params(params);
 
-        let response = csi.complete_all(&vec![completion_request; 2]);
+        let response = csi.complete_concurrently(vec![completion_request; 2]);
         assert!(response
             .into_iter()
-            .all(|r| r.text.trim() == "The capital of France is Paris."));
+            .all(|r| r.text.trim() == "The capital of France is Paris.<|eot_id|>"));
     }
 
     #[test]
@@ -277,7 +372,10 @@ What is the capital of France?<|eot_id|><|start_header_id|>assistant<|end_header
         let token = std::env::var("PHARIA_AI_TOKEN").unwrap();
         let csi = DevCsi::aleph_alpha(token);
 
-        let response = csi.chunk("123456", &ChunkParams::new("llama-3.1-8b-instruct", 1));
+        let response = csi.chunk(ChunkRequest::new(
+            "123456",
+            ChunkParams::new("llama-3.1-8b-instruct", 1),
+        ));
 
         assert_eq!(response, vec!["123", "456"]);
     }
@@ -289,9 +387,12 @@ What is the capital of France?<|eot_id|><|start_header_id|>assistant<|end_header
         let token = std::env::var("PHARIA_AI_TOKEN").unwrap();
         let csi = DevCsi::aleph_alpha(token);
 
-        let response = csi.select_language("A rising tide lifts all boats", &Language::all());
+        let response = csi.select_language(SelectLanguageRequest::new(
+            "A rising tide lifts all boats",
+            &[LanguageCode::Eng, LanguageCode::Deu, LanguageCode::Fra],
+        ));
 
-        assert_eq!(response, Some(Language::Eng));
+        assert_eq!(response, Some(LanguageCode::Eng));
     }
 
     #[test]
@@ -302,10 +403,8 @@ What is the capital of France?<|eot_id|><|start_header_id|>assistant<|end_header
         let csi = DevCsi::aleph_alpha(token);
 
         let response = csi.search(
-            &IndexPath::new("Kernel", "test", "asym-64"),
-            "decoder",
-            10,
-            None,
+            SearchRequest::new("decoder", IndexPath::new("Kernel", "test", "asym-64"))
+                .with_max_results(10),
         );
 
         assert!(!response.is_empty());
@@ -326,8 +425,63 @@ What is the capital of France?<|eot_id|><|start_header_id|>assistant<|end_header
             max_tokens: Some(1),
             ..Default::default()
         });
-        let response = csi.chat(&request);
+        let response = csi.chat(request);
 
         assert!(!response.message.content.is_empty());
+    }
+
+    #[test]
+    fn documents() {
+        #[derive(Debug, Deserialize, Serialize)]
+        struct Metadata {
+            created: Timestamp,
+            url: String,
+        }
+
+        drop(dotenvy::dotenv());
+
+        let token = std::env::var("PHARIA_AI_TOKEN").unwrap();
+        let csi = DevCsi::aleph_alpha(token);
+
+        let path = DocumentPath::new("Kernel", "test", "kernel-docs");
+        let response = csi.document::<Metadata>(path.clone()).unwrap();
+
+        assert_eq!(response.path, path);
+        assert_eq!(response.contents.len(), 1);
+        assert!(
+            matches!(&response.contents[0], Modality::Text { text } if text.contains("Kernel"))
+        );
+    }
+
+    #[test]
+    fn document_metadata() {
+        #[derive(Debug, Deserialize, Serialize)]
+        struct Metadata {
+            created: Timestamp,
+            url: String,
+        }
+
+        drop(dotenvy::dotenv());
+
+        let token = std::env::var("PHARIA_AI_TOKEN").unwrap();
+        let csi = DevCsi::aleph_alpha(token);
+
+        let path = DocumentPath::new("Kernel", "test", "kernel-docs");
+        let response = csi.document_metadata::<Metadata>(path.clone()).unwrap();
+
+        assert!(response.is_some());
+    }
+
+    #[test]
+    fn invalid_metadata() {
+        drop(dotenvy::dotenv());
+
+        let token = std::env::var("PHARIA_AI_TOKEN").unwrap();
+        let csi = DevCsi::aleph_alpha(token);
+
+        let path = DocumentPath::new("Kernel", "test", "kernel-docs");
+        let response = csi.document_metadata::<String>(path.clone());
+
+        assert!(response.is_err());
     }
 }
