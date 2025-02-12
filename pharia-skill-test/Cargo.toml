@@ -11,6 +11,7 @@ categories.workspace = true
 keywords.workspace = true
 
 [dependencies]
+anyhow.workspace = true
 pharia-skill.workspace = true
 serde.workspace = true
 ureq.workspace = true
@@ -21,3 +22,6 @@ workspace = true
 [dev-dependencies]
 anyhow.workspace = true
 dotenvy.workspace = true
+jiff.workspace = true
+jsonschema.workspace = true
+schemars.workspace = true

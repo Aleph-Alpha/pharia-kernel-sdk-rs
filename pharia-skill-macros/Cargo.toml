@@ -15,6 +15,7 @@ name = "pharia_skill_macros"
 proc-macro = true
 
 [dependencies]
+proc-macro2.workspace = true
 quote.workspace = true
 syn.workspace = true
 
