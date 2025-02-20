@@ -109,7 +109,7 @@ fn extract_doc_comment(func: &ItemFn) -> String {
     func.attrs
         .iter()
         // Only grab attributes that are outer doc comments
-        .filter(|attr| attr.style == AttrStyle::Outer && attr.path().is_ident("doc"))
+        .filter(|attr| matches!(attr.style, AttrStyle::Outer) && attr.path().is_ident("doc"))
         // All doc comments should be NameValues
         .filter_map(|attr| attr.meta.require_name_value().ok())
         // Pull out the literal value of the line
