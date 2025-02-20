@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0](https://github.com/Aleph-Alpha/pharia-kernel-sdk-rs/compare/pharia-skill-macros-v0.4.2...pharia-skill-macros-v0.5.0)
+
+### Features
+
+- [**breaking**] Update to WIT world v0.3 - ([be18799](https://github.com/Aleph-Alpha/pharia-kernel-sdk-rs/commit/be18799b6d4f63cc9fc4e11180f70626b472e2be))
+
+
 ## [0.4.1](https://github.com/Aleph-Alpha/pharia-kernel-sdk-rs/compare/pharia-skill-macros-v0.4.0...pharia-skill-macros-v0.4.1)
 
 ### Builds
