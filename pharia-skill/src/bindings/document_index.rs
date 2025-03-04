@@ -7,17 +7,22 @@ use crate::{
 
 use super::pharia::skill::document_index;
 
-impl From<IndexPath<'_>> for document_index::IndexPath {
-    fn from(value: IndexPath<'_>) -> Self {
+impl From<IndexPath> for document_index::IndexPath {
+    fn from(value: IndexPath) -> Self {
+        let IndexPath {
+            namespace,
+            collection,
+            index,
+        } = value;
         Self {
-            namespace: value.namespace.into_owned(),
-            collection: value.collection.into_owned(),
-            index: value.index.into_owned(),
+            namespace,
+            collection,
+            index,
         }
     }
 }
 
-impl From<document_index::DocumentPath> for DocumentPath<'_> {
+impl From<document_index::DocumentPath> for DocumentPath {
     fn from(value: document_index::DocumentPath) -> Self {
         let document_index::DocumentPath {
             namespace,
@@ -25,30 +30,30 @@ impl From<document_index::DocumentPath> for DocumentPath<'_> {
             name,
         } = value;
         Self {
-            namespace: namespace.into(),
-            collection: collection.into(),
-            name: name.into(),
+            namespace,
+            collection,
+            name,
         }
     }
 }
 
-impl From<DocumentPath<'_>> for document_index::DocumentPath {
-    fn from(value: DocumentPath<'_>) -> Self {
+impl From<DocumentPath> for document_index::DocumentPath {
+    fn from(value: DocumentPath) -> Self {
         let DocumentPath {
             namespace,
             collection,
             name,
         } = value;
         Self {
-            namespace: namespace.into_owned(),
-            collection: collection.into_owned(),
-            name: name.into_owned(),
+            namespace,
+            collection,
+            name,
         }
     }
 }
 
-impl From<SearchRequest<'_>> for document_index::SearchRequest {
-    fn from(value: SearchRequest<'_>) -> Self {
+impl From<SearchRequest> for document_index::SearchRequest {
+    fn from(value: SearchRequest) -> Self {
         let SearchRequest {
             query,
             index_path,
@@ -58,15 +63,15 @@ impl From<SearchRequest<'_>> for document_index::SearchRequest {
         } = value;
         Self {
             index_path: index_path.into(),
-            query: query.into_owned(),
+            query,
             max_results,
             min_score,
-            filters: filters.iter().cloned().map(Into::into).collect(),
+            filters: filters.into_iter().map(Into::into).collect(),
         }
     }
 }
 
-impl From<document_index::SearchResult> for SearchResult<'_> {
+impl From<document_index::SearchResult> for SearchResult {
     fn from(value: document_index::SearchResult) -> Self {
         let document_index::SearchResult {
             document_path,
@@ -77,7 +82,7 @@ impl From<document_index::SearchResult> for SearchResult<'_> {
         } = value;
         Self {
             document_path: document_path.into(),
-            content: content.into(),
+            content,
             score,
             start: start.into(),
             end: end.into(),
@@ -92,42 +97,42 @@ impl From<document_index::TextCursor> for TextCursor {
     }
 }
 
-impl From<SearchFilter<'_>> for document_index::SearchFilter {
-    fn from(value: SearchFilter<'_>) -> Self {
+impl From<SearchFilter> for document_index::SearchFilter {
+    fn from(value: SearchFilter) -> Self {
         match value {
             SearchFilter::Without(conditions) => {
-                Self::Without(conditions.iter().cloned().map(Into::into).collect())
+                Self::Without(conditions.into_iter().map(Into::into).collect())
             }
             SearchFilter::WithOneOf(conditions) => {
-                Self::WithOneOf(conditions.iter().cloned().map(Into::into).collect())
+                Self::WithOneOf(conditions.into_iter().map(Into::into).collect())
             }
             SearchFilter::With(conditions) => {
-                Self::WithAll(conditions.iter().cloned().map(Into::into).collect())
+                Self::WithAll(conditions.into_iter().map(Into::into).collect())
             }
         }
     }
 }
 
-impl From<FilterCondition<'_>> for document_index::MetadataFilter {
-    fn from(value: FilterCondition<'_>) -> Self {
+impl From<FilterCondition> for document_index::MetadataFilter {
+    fn from(value: FilterCondition) -> Self {
         match value {
             FilterCondition::Metadata(metadata_filter) => metadata_filter.into(),
         }
     }
 }
 
-impl From<MetadataFilter<'_>> for document_index::MetadataFilter {
-    fn from(value: MetadataFilter<'_>) -> Self {
+impl From<MetadataFilter> for document_index::MetadataFilter {
+    fn from(value: MetadataFilter) -> Self {
         let MetadataFilter { field, condition } = value;
         Self {
-            field: field.into_owned(),
+            field,
             condition: condition.into(),
         }
     }
 }
 
-impl From<MetadataFilterCondition<'_>> for document_index::MetadataFilterCondition {
-    fn from(value: MetadataFilterCondition<'_>) -> Self {
+impl From<MetadataFilterCondition> for document_index::MetadataFilterCondition {
+    fn from(value: MetadataFilterCondition) -> Self {
         match value {
             MetadataFilterCondition::GreaterThan(n) => Self::GreaterThan(n),
             MetadataFilterCondition::GreaterThanOrEqualTo(n) => Self::GreaterThanOrEqualTo(n),
@@ -145,26 +150,26 @@ impl From<MetadataFilterCondition<'_>> for document_index::MetadataFilterConditi
     }
 }
 
-impl From<MetadataFieldValue<'_>> for document_index::MetadataFieldValue {
-    fn from(value: MetadataFieldValue<'_>) -> Self {
+impl From<MetadataFieldValue> for document_index::MetadataFieldValue {
+    fn from(value: MetadataFieldValue) -> Self {
         match value {
-            MetadataFieldValue::String(s) => Self::StringType(s.into_owned()),
+            MetadataFieldValue::String(s) => Self::StringType(s),
             MetadataFieldValue::Integer(n) => Self::IntegerType(n),
             MetadataFieldValue::Boolean(b) => Self::BooleanType(b),
         }
     }
 }
 
-impl From<document_index::Modality> for Modality<'_> {
+impl From<document_index::Modality> for Modality {
     fn from(value: document_index::Modality) -> Self {
         match value {
-            document_index::Modality::Text(text) => Self::Text { text: text.into() },
+            document_index::Modality::Text(text) => Self::Text { text },
             document_index::Modality::Image => Self::Image,
         }
     }
 }
 
-impl<Metadata> TryFrom<document_index::Document> for Document<'_, Metadata>
+impl<Metadata> TryFrom<document_index::Document> for Document<Metadata>
 where
     Metadata: for<'a> Deserialize<'a>,
 {

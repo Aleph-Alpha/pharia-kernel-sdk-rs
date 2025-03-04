@@ -26,11 +26,11 @@ wit_bindgen::generate!({
 pub struct WitCsi;
 
 impl super::Csi for WitCsi {
-    fn chunk_concurrently(&self, requests: Vec<ChunkRequest<'_>>) -> Vec<Vec<String>> {
+    fn chunk_concurrently(&self, requests: Vec<ChunkRequest>) -> Vec<Vec<String>> {
         skill::chunking::chunk(&requests.into_iter().map(Into::into).collect::<Vec<_>>())
     }
 
-    fn search_concurrently(&self, requests: Vec<SearchRequest<'_>>) -> Vec<Vec<SearchResult<'_>>> {
+    fn search_concurrently(&self, requests: Vec<SearchRequest>) -> Vec<Vec<SearchResult>> {
         skill::document_index::search(&requests.into_iter().map(Into::into).collect::<Vec<_>>())
             .into_iter()
             .map(|results| results.into_iter().map(Into::into).collect())
@@ -39,8 +39,8 @@ impl super::Csi for WitCsi {
 
     fn documents<Metadata>(
         &self,
-        paths: Vec<DocumentPath<'_>>,
-    ) -> anyhow::Result<Vec<Document<'_, Metadata>>>
+        paths: Vec<DocumentPath>,
+    ) -> anyhow::Result<Vec<Document<Metadata>>>
     where
         Metadata: for<'a> Deserialize<'a>,
     {
@@ -52,7 +52,7 @@ impl super::Csi for WitCsi {
 
     fn documents_metadata<Metadata>(
         &self,
-        paths: Vec<DocumentPath<'_>>,
+        paths: Vec<DocumentPath>,
     ) -> anyhow::Result<Vec<Option<Metadata>>>
     where
         Metadata: for<'a> Deserialize<'a>,
@@ -65,14 +65,14 @@ impl super::Csi for WitCsi {
         .collect()
     }
 
-    fn chat_concurrently(&self, requests: Vec<ChatRequest<'_>>) -> Vec<ChatResponse<'_>> {
+    fn chat_concurrently(&self, requests: Vec<ChatRequest>) -> Vec<ChatResponse> {
         skill::inference::chat(&requests.into_iter().map(Into::into).collect::<Vec<_>>())
             .into_iter()
             .map(Into::into)
             .collect()
     }
 
-    fn complete_concurrently(&self, requests: Vec<CompletionRequest<'_>>) -> Vec<Completion<'_>> {
+    fn complete_concurrently(&self, requests: Vec<CompletionRequest>) -> Vec<Completion> {
         skill::inference::complete(&requests.into_iter().map(Into::into).collect::<Vec<_>>())
             .into_iter()
             .map(Into::into)
@@ -81,7 +81,7 @@ impl super::Csi for WitCsi {
 
     fn select_language_concurrently(
         &self,
-        requests: Vec<SelectLanguageRequest<'_>>,
+        requests: Vec<SelectLanguageRequest>,
     ) -> Vec<Option<LanguageCode>> {
         skill::language::select_language(&requests.into_iter().map(Into::into).collect::<Vec<_>>())
             .into_iter()

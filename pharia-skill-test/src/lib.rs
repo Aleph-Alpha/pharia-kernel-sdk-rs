@@ -1,4 +1,4 @@
-use std::{borrow::Cow, time::Duration};
+use std::time::Duration;
 
 use pharia_skill::{
     ChatRequest, ChatResponse, ChunkRequest, Completion, CompletionRequest, Csi, Document,
@@ -11,23 +11,13 @@ use ureq::{json, serde_json::Value, Agent, AgentBuilder};
 pub struct StubCsi;
 
 impl Csi for StubCsi {
-    fn chat_concurrently(&self, requests: Vec<ChatRequest<'_>>) -> Vec<ChatResponse<'_>> {
+    fn chat_concurrently(&self, requests: Vec<ChatRequest>) -> Vec<ChatResponse> {
         requests
             .iter()
             .map(|_| ChatResponse {
                 message: Message::new("user", ""),
                 finish_reason: FinishReason::Stop,
-            })
-            .collect()
-    }
-
-    fn complete_concurrently(&self, requests: Vec<CompletionRequest<'_>>) -> Vec<Completion<'_>> {
-        requests
-            .into_iter()
-            .map(|request| Completion {
-                text: request.prompt.into_owned().into(),
-                finish_reason: FinishReason::Stop,
-                logprobs: Cow::Borrowed(&[]),
+                logprobs: vec![],
                 usage: TokenUsage {
                     prompt: 0,
                     completion: 0,
@@ -36,28 +26,43 @@ impl Csi for StubCsi {
             .collect()
     }
 
-    fn chunk_concurrently(&self, requests: Vec<ChunkRequest<'_>>) -> Vec<Vec<String>> {
+    fn complete_concurrently(&self, requests: Vec<CompletionRequest>) -> Vec<Completion> {
         requests
             .into_iter()
-            .map(|request| vec![request.text.into_owned()])
+            .map(|request| Completion {
+                text: request.prompt,
+                finish_reason: FinishReason::Stop,
+                logprobs: vec![],
+                usage: TokenUsage {
+                    prompt: 0,
+                    completion: 0,
+                },
+            })
+            .collect()
+    }
+
+    fn chunk_concurrently(&self, requests: Vec<ChunkRequest>) -> Vec<Vec<String>> {
+        requests
+            .into_iter()
+            .map(|request| vec![request.text])
             .collect()
     }
 
     fn select_language_concurrently(
         &self,
-        requests: Vec<SelectLanguageRequest<'_>>,
+        requests: Vec<SelectLanguageRequest>,
     ) -> Vec<Option<LanguageCode>> {
         requests.iter().map(|_| None).collect()
     }
 
-    fn search_concurrently(&self, _requests: Vec<SearchRequest<'_>>) -> Vec<Vec<SearchResult<'_>>> {
+    fn search_concurrently(&self, _requests: Vec<SearchRequest>) -> Vec<Vec<SearchResult>> {
         vec![]
     }
 
     fn documents<Metadata>(
         &self,
-        _paths: Vec<DocumentPath<'_>>,
-    ) -> anyhow::Result<Vec<Document<'_, Metadata>>>
+        _paths: Vec<DocumentPath>,
+    ) -> anyhow::Result<Vec<Document<Metadata>>>
     where
         Metadata: for<'a> Deserialize<'a>,
     {
@@ -66,7 +71,7 @@ impl Csi for StubCsi {
 
     fn documents_metadata<Metadata>(
         &self,
-        _paths: Vec<DocumentPath<'_>>,
+        _paths: Vec<DocumentPath>,
     ) -> anyhow::Result<Vec<Option<Metadata>>>
     where
         Metadata: for<'a> Deserialize<'a>,
@@ -89,23 +94,13 @@ impl MockCsi {
 }
 
 impl Csi for MockCsi {
-    fn chat_concurrently(&self, requests: Vec<ChatRequest<'_>>) -> Vec<ChatResponse<'_>> {
+    fn chat_concurrently(&self, requests: Vec<ChatRequest>) -> Vec<ChatResponse> {
         requests
             .iter()
             .map(|_| ChatResponse {
                 message: Message::new("user", self.response.clone()),
                 finish_reason: FinishReason::Stop,
-            })
-            .collect()
-    }
-
-    fn complete_concurrently(&self, requests: Vec<CompletionRequest<'_>>) -> Vec<Completion<'_>> {
-        requests
-            .iter()
-            .map(|_| Completion {
-                text: Cow::Borrowed(&self.response),
-                finish_reason: FinishReason::Stop,
-                logprobs: Cow::Borrowed(&[]),
+                logprobs: vec![],
                 usage: TokenUsage {
                     prompt: 0,
                     completion: 0,
@@ -114,28 +109,43 @@ impl Csi for MockCsi {
             .collect()
     }
 
-    fn chunk_concurrently(&self, requests: Vec<ChunkRequest<'_>>) -> Vec<Vec<String>> {
+    fn complete_concurrently(&self, requests: Vec<CompletionRequest>) -> Vec<Completion> {
+        requests
+            .iter()
+            .map(|_| Completion {
+                text: self.response.clone(),
+                finish_reason: FinishReason::Stop,
+                logprobs: vec![],
+                usage: TokenUsage {
+                    prompt: 0,
+                    completion: 0,
+                },
+            })
+            .collect()
+    }
+
+    fn chunk_concurrently(&self, requests: Vec<ChunkRequest>) -> Vec<Vec<String>> {
         requests
             .into_iter()
-            .map(|request| vec![request.text.into_owned()])
+            .map(|request| vec![request.text])
             .collect()
     }
 
     fn select_language_concurrently(
         &self,
-        requests: Vec<SelectLanguageRequest<'_>>,
+        requests: Vec<SelectLanguageRequest>,
     ) -> Vec<Option<LanguageCode>> {
         requests.iter().map(|_| None).collect()
     }
 
-    fn search_concurrently(&self, _requests: Vec<SearchRequest<'_>>) -> Vec<Vec<SearchResult<'_>>> {
+    fn search_concurrently(&self, _requests: Vec<SearchRequest>) -> Vec<Vec<SearchResult>> {
         vec![]
     }
 
     fn documents<Metadata>(
         &self,
-        _paths: Vec<DocumentPath<'_>>,
-    ) -> anyhow::Result<Vec<Document<'_, Metadata>>>
+        _paths: Vec<DocumentPath>,
+    ) -> anyhow::Result<Vec<Document<Metadata>>>
     where
         Metadata: for<'a> Deserialize<'a>,
     {
@@ -144,7 +154,7 @@ impl Csi for MockCsi {
 
     fn documents_metadata<Metadata>(
         &self,
-        _paths: Vec<DocumentPath<'_>>,
+        _paths: Vec<DocumentPath>,
     ) -> anyhow::Result<Vec<Option<Metadata>>>
     where
         Metadata: for<'a> Deserialize<'a>,
@@ -233,43 +243,43 @@ impl DevCsi {
 }
 
 impl Csi for DevCsi {
-    fn chat_concurrently(&self, requests: Vec<ChatRequest<'_>>) -> Vec<ChatResponse<'_>> {
+    fn chat_concurrently(&self, requests: Vec<ChatRequest>) -> Vec<ChatResponse> {
         self.csi_request(Function::Chat, json!({"requests": requests}))
             .unwrap()
     }
 
-    fn complete_concurrently(&self, requests: Vec<CompletionRequest<'_>>) -> Vec<Completion<'_>> {
+    fn complete_concurrently(&self, requests: Vec<CompletionRequest>) -> Vec<Completion> {
         self.csi_request(Function::Complete, json!({"requests": requests}))
             .unwrap()
     }
 
-    fn chunk_concurrently(&self, requests: Vec<ChunkRequest<'_>>) -> Vec<Vec<String>> {
+    fn chunk_concurrently(&self, requests: Vec<ChunkRequest>) -> Vec<Vec<String>> {
         self.csi_request(Function::Chunk, json!({"requests": requests}))
             .unwrap()
     }
 
     fn select_language_concurrently(
         &self,
-        requests: Vec<SelectLanguageRequest<'_>>,
+        requests: Vec<SelectLanguageRequest>,
     ) -> Vec<Option<LanguageCode>> {
         self.csi_request(Function::SelectLanguage, json!({"requests": requests}))
             .unwrap()
     }
 
-    fn search_concurrently(&self, requests: Vec<SearchRequest<'_>>) -> Vec<Vec<SearchResult<'_>>> {
+    fn search_concurrently(&self, requests: Vec<SearchRequest>) -> Vec<Vec<SearchResult>> {
         self.csi_request(Function::Search, json!({"requests": requests}))
             .unwrap()
     }
 
     fn documents<Metadata>(
         &self,
-        paths: Vec<DocumentPath<'_>>,
-    ) -> anyhow::Result<Vec<Document<'_, Metadata>>>
+        paths: Vec<DocumentPath>,
+    ) -> anyhow::Result<Vec<Document<Metadata>>>
     where
         Metadata: for<'a> Deserialize<'a> + Serialize,
     {
         Ok(self
-            .csi_request::<Vec<Document<'_, Metadata>>>(
+            .csi_request::<Vec<Document<Metadata>>>(
                 Function::Documents,
                 json!({"requests": paths}),
             )?
@@ -279,7 +289,7 @@ impl Csi for DevCsi {
 
     fn documents_metadata<Metadata>(
         &self,
-        paths: Vec<DocumentPath<'_>>,
+        paths: Vec<DocumentPath>,
     ) -> anyhow::Result<Vec<Option<Metadata>>>
     where
         Metadata: for<'a> Deserialize<'a> + Serialize,
@@ -323,7 +333,7 @@ You are a helpful assistant<|eot_id|><|start_header_id|>user<|end_header_id|>
 What is the capital of France?<|eot_id|><|start_header_id|>assistant<|end_header_id|>",
             )
             .with_params(CompletionParams {
-                stop: vec!["<|start_header_id|>".into()].into(),
+                stop: vec!["<|start_header_id|>".into()],
                 max_tokens: Some(10),
                 ..Default::default()
             }),
@@ -342,7 +352,7 @@ What is the capital of France?<|eot_id|><|start_header_id|>assistant<|end_header
         let csi = DevCsi::aleph_alpha(token);
 
         let params = CompletionParams {
-            stop: vec!["<|start_header_id|>".into()].into(),
+            stop: vec!["<|start_header_id|>".into()],
             max_tokens: Some(10),
             ..Default::default()
         };
@@ -389,7 +399,7 @@ What is the capital of France?<|eot_id|><|start_header_id|>assistant<|end_header
 
         let response = csi.select_language(SelectLanguageRequest::new(
             "A rising tide lifts all boats",
-            &[LanguageCode::Eng, LanguageCode::Deu, LanguageCode::Fra],
+            [LanguageCode::Eng, LanguageCode::Deu, LanguageCode::Fra],
         ));
 
         assert_eq!(response, Some(LanguageCode::Eng));

@@ -2,26 +2,26 @@ use crate::{ChunkParams, ChunkRequest};
 
 use super::pharia::skill::chunking;
 
-impl<'a> From<ChunkParams<'a>> for chunking::ChunkParams {
-    fn from(value: ChunkParams<'a>) -> Self {
+impl From<ChunkParams> for chunking::ChunkParams {
+    fn from(value: ChunkParams) -> Self {
         let ChunkParams {
             model,
             max_tokens,
             overlap,
         } = value;
         Self {
-            model: model.into_owned(),
+            model,
             max_tokens,
             overlap,
         }
     }
 }
 
-impl<'a> From<ChunkRequest<'a>> for chunking::ChunkRequest {
-    fn from(value: ChunkRequest<'a>) -> Self {
+impl From<ChunkRequest> for chunking::ChunkRequest {
+    fn from(value: ChunkRequest) -> Self {
         let ChunkRequest { text, params } = value;
         Self {
-            text: text.into_owned(),
+            text,
             params: params.into(),
         }
     }

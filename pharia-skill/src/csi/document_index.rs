@@ -1,25 +1,23 @@
-use std::borrow::Cow;
-
 use jiff::Timestamp;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
 /// Which documents you want to search in, and which type of index should be used
 #[derive(Clone, Debug, Default, Serialize)]
-pub struct IndexPath<'a> {
+pub struct IndexPath {
     /// The namespace the collection belongs to
-    pub namespace: Cow<'a, str>,
+    pub namespace: String,
     /// The collection you want to search in
-    pub collection: Cow<'a, str>,
+    pub collection: String,
     /// The search index you want to use for the collection
-    pub index: Cow<'a, str>,
+    pub index: String,
 }
 
-impl<'a> IndexPath<'a> {
+impl IndexPath {
     pub fn new(
-        namespace: impl Into<Cow<'a, str>>,
-        collection: impl Into<Cow<'a, str>>,
-        index: impl Into<Cow<'a, str>>,
+        namespace: impl Into<String>,
+        collection: impl Into<String>,
+        index: impl Into<String>,
     ) -> Self {
         Self {
             namespace: namespace.into(),
@@ -31,20 +29,20 @@ impl<'a> IndexPath<'a> {
 
 /// Location of a document in the search engine
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
-pub struct DocumentPath<'a> {
+pub struct DocumentPath {
     /// The namespace the collection belongs to
-    pub namespace: Cow<'a, str>,
+    pub namespace: String,
     /// The collection you want to search in
-    pub collection: Cow<'a, str>,
+    pub collection: String,
     /// The name of the document
-    pub name: Cow<'a, str>,
+    pub name: String,
 }
 
-impl<'a> DocumentPath<'a> {
+impl DocumentPath {
     pub fn new(
-        namespace: impl Into<Cow<'a, str>>,
-        collection: impl Into<Cow<'a, str>>,
-        name: impl Into<Cow<'a, str>>,
+        namespace: impl Into<String>,
+        collection: impl Into<String>,
+        name: impl Into<String>,
     ) -> Self {
         Self {
             namespace: namespace.into(),
@@ -55,27 +53,27 @@ impl<'a> DocumentPath<'a> {
 }
 
 #[derive(Debug, Serialize)]
-pub struct SearchRequest<'a> {
-    pub query: Cow<'a, str>,
-    pub index_path: IndexPath<'a>,
+pub struct SearchRequest {
+    pub query: String,
+    pub index_path: IndexPath,
     pub max_results: u32,
     pub min_score: Option<f64>,
-    pub filters: Cow<'a, [SearchFilter<'a>]>,
+    pub filters: Vec<SearchFilter>,
 }
 
-impl<'a> SearchRequest<'a> {
-    pub fn new(query: impl Into<Cow<'a, str>>, index_path: IndexPath<'a>) -> Self {
+impl SearchRequest {
+    pub fn new(query: impl Into<String>, index_path: IndexPath) -> Self {
         Self {
             query: query.into(),
             index_path,
             max_results: 1,
             min_score: None,
-            filters: Cow::Borrowed(&[]),
+            filters: Vec::new(),
         }
     }
 
     #[must_use]
-    pub fn with_filters(mut self, filters: impl Into<Cow<'a, [SearchFilter<'a>]>>) -> Self {
+    pub fn with_filters(mut self, filters: impl Into<Vec<SearchFilter>>) -> Self {
         self.filters = filters.into();
         self
     }
@@ -95,11 +93,11 @@ impl<'a> SearchRequest<'a> {
 
 /// Result to a search query
 #[derive(Clone, Debug, Deserialize, PartialEq)]
-pub struct SearchResult<'a> {
+pub struct SearchResult {
     /// The path to the document that was found
-    pub document_path: DocumentPath<'a>,
+    pub document_path: DocumentPath,
     /// The content of the document that was found
-    pub content: Cow<'a, str>,
+    pub content: String,
     /// How relevant the document is to the search query
     pub score: f64,
     pub start: TextCursor,
@@ -116,16 +114,16 @@ pub struct TextCursor {
 
 #[derive(Clone, Serialize, Debug)]
 #[serde(rename_all = "snake_case")]
-pub enum SearchFilter<'a> {
-    Without(Cow<'a, [FilterCondition<'a>]>),
-    WithOneOf(Cow<'a, [FilterCondition<'a>]>),
-    With(Cow<'a, [FilterCondition<'a>]>),
+pub enum SearchFilter {
+    Without(Vec<FilterCondition>),
+    WithOneOf(Vec<FilterCondition>),
+    With(Vec<FilterCondition>),
 }
 
 #[derive(Clone, Serialize, Debug)]
 #[serde(rename_all = "snake_case")]
-pub enum FilterCondition<'a> {
-    Metadata(MetadataFilter<'a>),
+pub enum FilterCondition {
+    Metadata(MetadataFilter),
 }
 
 #[derive(Copy, Clone, Serialize, Debug)]
@@ -135,15 +133,15 @@ pub enum ModalityType {
 }
 
 #[derive(Clone, Serialize, Debug)]
-pub struct MetadataFilter<'a> {
-    pub field: Cow<'a, str>,
+pub struct MetadataFilter {
+    pub field: String,
     #[serde(flatten)]
-    pub condition: MetadataFilterCondition<'a>,
+    pub condition: MetadataFilterCondition,
 }
 
 #[derive(Clone, Serialize, Debug)]
 #[serde(rename_all = "snake_case")]
-pub enum MetadataFilterCondition<'a> {
+pub enum MetadataFilterCondition {
     GreaterThan(f64),
     GreaterThanOrEqualTo(f64),
     LessThan(f64),
@@ -152,28 +150,28 @@ pub enum MetadataFilterCondition<'a> {
     AtOrAfter(Timestamp),
     Before(Timestamp),
     AtOrBefore(Timestamp),
-    EqualTo(MetadataFieldValue<'a>),
+    EqualTo(MetadataFieldValue),
     IsNull(serde_bool::True),
 }
 
 #[derive(Clone, Serialize, Debug)]
 #[serde(untagged)]
-pub enum MetadataFieldValue<'a> {
-    String(Cow<'a, str>),
+pub enum MetadataFieldValue {
+    String(String),
     Integer(i64),
     Boolean(bool),
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "snake_case", tag = "modality")]
-pub enum Modality<'a> {
-    Text { text: Cow<'a, str> },
+pub enum Modality {
+    Text { text: String },
     Image,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct Document<'a, Metadata = Value> {
-    pub path: DocumentPath<'a>,
-    pub contents: Vec<Modality<'a>>,
+pub struct Document<Metadata = Value> {
+    pub path: DocumentPath,
+    pub contents: Vec<Modality>,
     pub metadata: Option<Metadata>,
 }

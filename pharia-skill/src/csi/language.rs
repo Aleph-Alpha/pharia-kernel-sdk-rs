@@ -1,5 +1,3 @@
-use std::borrow::Cow;
-
 use serde::{Deserialize, Serialize};
 
 #[derive(
@@ -161,16 +159,13 @@ pub enum LanguageCode {
 }
 
 #[derive(Debug, Serialize)]
-pub struct SelectLanguageRequest<'a> {
-    pub text: Cow<'a, str>,
-    pub languages: Cow<'a, [LanguageCode]>,
+pub struct SelectLanguageRequest {
+    pub text: String,
+    pub languages: Vec<LanguageCode>,
 }
 
-impl<'a> SelectLanguageRequest<'a> {
-    pub fn new(
-        text: impl Into<Cow<'a, str>>,
-        languages: impl Into<Cow<'a, [LanguageCode]>>,
-    ) -> Self {
+impl SelectLanguageRequest {
+    pub fn new(text: impl Into<String>, languages: impl Into<Vec<LanguageCode>>) -> Self {
         Self {
             text: text.into(),
             languages: languages.into(),
