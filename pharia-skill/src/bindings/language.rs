@@ -2,11 +2,11 @@ use crate::SelectLanguageRequest;
 
 use super::pharia::skill::language;
 
-impl From<SelectLanguageRequest<'_>> for language::SelectLanguageRequest {
-    fn from(value: SelectLanguageRequest<'_>) -> Self {
+impl From<SelectLanguageRequest> for language::SelectLanguageRequest {
+    fn from(value: SelectLanguageRequest) -> Self {
         let SelectLanguageRequest { text, languages } = value;
         Self {
-            text: text.into_owned(),
+            text,
             languages: languages.iter().copied().map(|l| l.to_string()).collect(),
         }
     }
@@ -30,7 +30,7 @@ mod tests {
             converted,
             language::SelectLanguageRequest {
                 text: text.into(),
-                languages,
+                languages
             }
         );
     }

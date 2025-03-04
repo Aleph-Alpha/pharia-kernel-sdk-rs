@@ -12,7 +12,7 @@ fn can_compile(csi: &impl Csi, input: Vec<&str>) -> Vec<String> {
             .collect::<Vec<_>>(),
     )
     .into_iter()
-    .map(|c| c.text.into_owned())
+    .map(|c| c.text)
     .collect()
 }
 

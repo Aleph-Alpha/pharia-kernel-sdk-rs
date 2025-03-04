@@ -1,5 +1,3 @@
-use std::borrow::Cow;
-
 use crate::{
     ChatParams, ChatRequest, ChatResponse, Completion, CompletionParams, CompletionRequest,
     Distribution, FinishReason, Logprob, Logprobs, Message, TokenUsage,
@@ -7,17 +5,14 @@ use crate::{
 
 use super::pharia::skill::inference;
 
-impl From<inference::Logprob> for Logprob<'_> {
+impl From<inference::Logprob> for Logprob {
     fn from(value: inference::Logprob) -> Self {
         let inference::Logprob { token, logprob } = value;
-        Self {
-            token: token.into(),
-            logprob,
-        }
+        Self { token, logprob }
     }
 }
 
-impl From<inference::Distribution> for Distribution<'_> {
+impl From<inference::Distribution> for Distribution {
     fn from(value: inference::Distribution) -> Self {
         let inference::Distribution { sampled, top } = value;
         Self {
@@ -54,8 +49,8 @@ impl From<Logprobs> for inference::Logprobs {
     }
 }
 
-impl<'a> From<CompletionParams<'a>> for inference::CompletionParams {
-    fn from(value: CompletionParams<'a>) -> Self {
+impl From<CompletionParams> for inference::CompletionParams {
+    fn from(value: CompletionParams) -> Self {
         let CompletionParams {
             max_tokens,
             temperature,
@@ -72,7 +67,7 @@ impl<'a> From<CompletionParams<'a>> for inference::CompletionParams {
             temperature,
             top_k,
             top_p,
-            stop: stop.iter().cloned().map(Cow::into_owned).collect(),
+            stop,
             return_special_tokens,
             frequency_penalty,
             presence_penalty,
@@ -81,22 +76,22 @@ impl<'a> From<CompletionParams<'a>> for inference::CompletionParams {
     }
 }
 
-impl<'a> From<CompletionRequest<'a>> for inference::CompletionRequest {
-    fn from(value: CompletionRequest<'a>) -> Self {
+impl From<CompletionRequest> for inference::CompletionRequest {
+    fn from(value: CompletionRequest) -> Self {
         let CompletionRequest {
             model,
             prompt,
             params,
         } = value;
         Self {
-            model: model.into_owned(),
-            prompt: prompt.into_owned(),
+            model,
+            prompt,
             params: params.into(),
         }
     }
 }
 
-impl From<inference::Completion> for Completion<'_> {
+impl From<inference::Completion> for Completion {
     fn from(value: inference::Completion) -> Self {
         let inference::Completion {
             text,
@@ -105,7 +100,7 @@ impl From<inference::Completion> for Completion<'_> {
             usage,
         } = value;
         Self {
-            text: text.into(),
+            text,
             finish_reason: finish_reason.into(),
             logprobs: logprobs.into_iter().map(Into::into).collect(),
             usage: usage.into(),
@@ -113,21 +108,17 @@ impl From<inference::Completion> for Completion<'_> {
     }
 }
 
-impl<'a> From<Message<'a>> for inference::Message {
-    fn from(value: Message<'a>) -> Self {
-        Self {
-            role: value.role.into_owned(),
-            content: value.content.clone().into_owned(),
-        }
+impl From<Message> for inference::Message {
+    fn from(value: Message) -> Self {
+        let Message { role, content } = value;
+        Self { role, content }
     }
 }
 
-impl From<inference::Message> for Message<'_> {
+impl From<inference::Message> for Message {
     fn from(value: inference::Message) -> Self {
-        Self {
-            role: value.role.into(),
-            content: value.content.into(),
-        }
+        let inference::Message { role, content } = value;
+        Self { role, content }
     }
 }
 
@@ -152,26 +143,34 @@ impl From<ChatParams> for inference::ChatParams {
     }
 }
 
-impl From<ChatRequest<'_>> for inference::ChatRequest {
-    fn from(value: ChatRequest<'_>) -> Self {
+impl From<ChatRequest> for inference::ChatRequest {
+    fn from(value: ChatRequest) -> Self {
         let ChatRequest {
             model,
             messages,
             params,
         } = value;
         Self {
-            model: model.into_owned(),
+            model,
             messages: messages.into_iter().map(Into::into).collect::<Vec<_>>(),
             params: params.into(),
         }
     }
 }
 
-impl From<inference::ChatResponse> for ChatResponse<'_> {
+impl From<inference::ChatResponse> for ChatResponse {
     fn from(value: inference::ChatResponse) -> Self {
+        let inference::ChatResponse {
+            message,
+            finish_reason,
+            logprobs,
+            usage,
+        } = value;
         Self {
-            message: value.message.into(),
-            finish_reason: value.finish_reason.into(),
+            message: message.into(),
+            finish_reason: finish_reason.into(),
+            logprobs: logprobs.into_iter().map(Into::into).collect::<Vec<_>>(),
+            usage: usage.into(),
         }
     }
 }
@@ -223,7 +222,7 @@ mod tests {
                     presence_penalty,
                     logprobs: inference::Logprobs::No,
                     top_k,
-                    stop: stop.iter().map(|s| s.clone().into_owned()).collect(),
+                    stop: stop.into(),
                     return_special_tokens,
                 },
             }
@@ -258,10 +257,7 @@ mod tests {
                 text: text.into(),
                 finish_reason: FinishReason::Stop,
                 logprobs: (&[Distribution {
-                    sampled: Logprob {
-                        token: token.into(),
-                        logprob
-                    },
+                    sampled: Logprob { token, logprob },
                     top: (&[]).into()
                 }])
                     .into(),
