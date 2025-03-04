@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0](https://github.com/Aleph-Alpha/pharia-kernel-sdk-rs/compare/pharia-skill-test-v0.5.0...pharia-skill-test-v0.6.0)
+
+### Features
+
+- [**breaking**] Simplify struct interfaces - ([9993a70](https://github.com/Aleph-Alpha/pharia-kernel-sdk-rs/commit/9993a70240ec407bc1077903aff268d05721dd77))
+
+
 ## [0.5.0](https://github.com/Aleph-Alpha/pharia-kernel-sdk-rs/compare/pharia-skill-test-v0.4.2...pharia-skill-test-v0.5.0)
 
 ### Features
