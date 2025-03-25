@@ -7,19 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.6.1](https://github.com/Aleph-Alpha/pharia-kernel-sdk-rs/compare/pharia-skill-v0.6.0...pharia-skill-v0.6.1)
-
-### Features
-
-- Add license and prep release - ([35bfd68](https://github.com/Aleph-Alpha/pharia-kernel-sdk-rs/commit/35bfd68bc5d9dadb688fd0c83e22bb82feb7303f))
-
-
 ## [0.6.0](https://github.com/Aleph-Alpha/pharia-kernel-sdk-rs/compare/pharia-skill-v0.5.0...pharia-skill-v0.6.0)
 
 ### Features
 
 - [**breaking**] Simplify struct interfaces - ([9993a70](https://github.com/Aleph-Alpha/pharia-kernel-sdk-rs/commit/9993a70240ec407bc1077903aff268d05721dd77))
-
 
 ## [0.5.0](https://github.com/Aleph-Alpha/pharia-kernel-sdk-rs/compare/pharia-skill-v0.4.2...pharia-skill-v0.5.0)
 
@@ -27,20 +19,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [**breaking**] Update to WIT world v0.3 - ([be18799](https://github.com/Aleph-Alpha/pharia-kernel-sdk-rs/commit/be18799b6d4f63cc9fc4e11180f70626b472e2be))
 
-
 ## [0.4.2](https://github.com/Aleph-Alpha/pharia-kernel-sdk-rs/compare/pharia-skill-v0.4.1...pharia-skill-v0.4.2)
 
 ### Fixes
 
 - Deserialization of chat messages - ([85e374a](https://github.com/Aleph-Alpha/pharia-kernel-sdk-rs/commit/85e374a478586ef9cd4c7bb75cf92e9d38127893))
 
-
 ## [0.4.1](https://github.com/Aleph-Alpha/pharia-kernel-sdk-rs/compare/pharia-skill-v0.4.0...pharia-skill-v0.4.1)
 
 ### Builds
 
 - Change msrv to 1.82 - ([0e10fd4](https://github.com/Aleph-Alpha/pharia-kernel-sdk-rs/commit/0e10fd4cd277f1894b4c827e0aed8cd21919a4ac))
-
 
 ## [0.3.0](https://github.com/Aleph-Alpha/pharia-kernel-sdk-rs/compare/pharia-skill-v0.2.1...pharia-skill-v0.3.0)
 
@@ -49,13 +38,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [**breaking**] Chat endpoint replaces prompt helpers - ([aac91b6](https://github.com/Aleph-Alpha/pharia-kernel-sdk-rs/commit/aac91b6fb152bbd647b8f0bd0dabeef6bbb06c13))
 - Add chat to sdk - ([34cadca](https://github.com/Aleph-Alpha/pharia-kernel-sdk-rs/commit/34cadca8af4b0ec4a743d98d722c05ffe120512a))
 
-
 ## [0.2.1](https://github.com/Aleph-Alpha/pharia-kernel-sdk-rs/compare/pharia-skill-v0.2.0...pharia-skill-v0.2.1)
 
 ### Features
 
 - Add search to sdk - ([f24f416](https://github.com/Aleph-Alpha/pharia-kernel-sdk-rs/commit/f24f4160a7f3d5e37caefebd7d829f980ade1c49))
-
 
 ## [0.2.0](https://github.com/Aleph-Alpha/pharia-kernel-sdk-rs/compare/pharia-skill-v0.1.1...pharia-skill-v0.2.0)
 
@@ -71,7 +58,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Update readme example - ([e065430](https://github.com/Aleph-Alpha/pharia-kernel-sdk-rs/commit/e06543064673d851567dc0272248c0fdaa0584d2))
 - Typo - ([cf9af7b](https://github.com/Aleph-Alpha/pharia-kernel-sdk-rs/commit/cf9af7b0d31774b5360d6d1fda59db44cdadc268))
-
 
 ## [0.1.0](https://github.com/Aleph-Alpha/pharia-kernel-sdk-rs/releases/tag/pharia-skill-v0.1.0) - 2024-10-10
 

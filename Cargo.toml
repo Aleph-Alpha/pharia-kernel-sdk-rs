@@ -19,14 +19,14 @@ repository = "https://github.com/Aleph-Alpha/pharia-kernel-sdk-rs"
 readme = "README.md"
 categories = ["api-bindings"]
 keywords = ["ai", "llm", "skill"]
-version = "0.6.1"
+version = "0.6.0"
 license = "Apache-2.0"
 rust-version = "1.82.0"
 
 [workspace.dependencies]
-pharia-skill = { path = "./pharia-skill", registry = "jfrog", version = "0.6.1" }
-pharia-skill-macros = { path = "./pharia-skill-macros", registry = "jfrog", version = "0.6.1" }
-pharia-skill-test = { path = "./pharia-skill-test", registry = "jfrog", version = "0.6.1" }
+pharia-skill = { path = "./pharia-skill", registry = "jfrog", version = "0.6.0" }
+pharia-skill-macros = { path = "./pharia-skill-macros", registry = "jfrog", version = "0.6.0" }
+pharia-skill-test = { path = "./pharia-skill-test", registry = "jfrog", version = "0.6.0" }
 
 anyhow = "1.0.97"
 dotenvy = "0.15"
