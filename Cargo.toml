@@ -13,8 +13,6 @@ authors = [
     "Ben Brandt <benjamin.brandt@aleph-alpha.com>",
     "Moritz Althaus <moritz.althaus@aleph-alpha.com>",
     "Jia Ho Lee <jiaho.lee@aleph-alpha.com>",
-    "Daniel Tscherwinka <daniel.tscherwinka@aleph-alpha.com>",
-    "Peter Barth <peter.barth@aleph-alpha.com>",
 ]
 edition = "2021"
 repository = "https://github.com/Aleph-Alpha/pharia-kernel-sdk-rs"
@@ -22,6 +20,8 @@ readme = "README.md"
 categories = ["API bindings"]
 keywords = ["ai", "llm", "skill"]
 version = "0.6.0"
+license = "Apache-2.0"
+rust-version = "1.82.0"
 
 [workspace.dependencies]
 pharia-skill = { path = "./pharia-skill", registry = "jfrog", version = "0.6.0" }
@@ -54,7 +54,7 @@ rust-2024-compatibility = "warn"
 unused = { level = "warn", priority = -1 }
 
 [workspace.lints.clippy]
-# cargo = { level = "warn", priority = -1 }
+cargo = { level = "warn", priority = -1 }
 pedantic = { level = "warn", priority = -1 }
 module-name-repetitions = "allow"
 needless-pass-by-value = "allow"

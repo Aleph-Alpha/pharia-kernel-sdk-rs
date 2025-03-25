@@ -2,13 +2,14 @@
 name = "pharia-skill-macros"
 description = "Procedural macros for use within the `pharia-skill` crate."
 version.workspace = true
-rust-version = "1.82.0"
+rust-version.workspace = true
 authors.workspace = true
 edition.workspace = true
 keywords.workspace = true
 readme.workspace = true
 repository.workspace = true
 categories.workspace = true
+license.workspace = true
 
 [lib]
 name = "pharia_skill_macros"
