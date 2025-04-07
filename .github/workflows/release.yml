@@ -19,10 +19,12 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@56f84321dbccf38fb67ce29ab63e4754056677e0
+        with:
+          toolchain: stable
 
       - name: Run release-plz
-        uses: release-plz/action@v0.5
+        uses: release-plz/action@4cd77ee4d22f0cdb1a461e6eb3591cddc5e1f665
         with:
           command: release
         env:
@@ -42,10 +44,12 @@ jobs:
           fetch-depth: 0
 
       - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@56f84321dbccf38fb67ce29ab63e4754056677e0
+        with:
+          toolchain: stable
 
       - name: Run release-plz
-        uses: release-plz/action@v0.5
+        uses: release-plz/action@4cd77ee4d22f0cdb1a461e6eb3591cddc5e1f665
         with:
           command: release-pr
         env:
