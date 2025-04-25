@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: taiki-e/install-action@9903ab6feadaec33945de535fe9d181b91802a55
+      - uses: taiki-e/install-action@067268f3aa4f1f3c2becf69d7454955cfab17334
         with:
           tool: cargo-audit
       - uses: rustsec/audit-check@69366f33c96575abad1ee0dba8212993eecbe998
