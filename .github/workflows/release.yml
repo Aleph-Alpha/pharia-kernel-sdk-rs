@@ -24,7 +24,7 @@ jobs:
           toolchain: stable
 
       - name: Run release-plz
-        uses: release-plz/action@bbd1afc9813d25602e002b29e96e0aacebab1160
+        uses: release-plz/action@a4ffad5637d546ada0aa82d84fa91eafb8f5fb6b
         with:
           command: release
         env:
@@ -49,7 +49,7 @@ jobs:
           toolchain: stable
 
       - name: Run release-plz
-        uses: release-plz/action@bbd1afc9813d25602e002b29e96e0aacebab1160
+        uses: release-plz/action@a4ffad5637d546ada0aa82d84fa91eafb8f5fb6b
         with:
           command: release-pr
         env:
